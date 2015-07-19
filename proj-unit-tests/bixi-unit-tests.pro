@@ -6,6 +6,7 @@ TEMPLATE = app
 TARGET = bixi-unit-tests
 INCLUDEPATH += . ../PhysicalObjects ../Utilities ../UnitTests ../Universe
 LIBS += -lCppUTest
+CONFIG -= qt
 
 # Input
 HEADERS += ../PhysicalObjects/PhysicalObject.h \
