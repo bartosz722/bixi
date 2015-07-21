@@ -1,7 +1,8 @@
 #include <iostream>
 #include "Universe.h"
 #include "Assert.h"
-#include "SphericalObject.h"
+
+#include "SphericalObject.h" // tmp
 
 using namespace std;
 
@@ -52,10 +53,8 @@ bool Universe::loadPhysicalObjects() {
   so._position = Vector(0, 0, 0);
   so._radius = 10;
 
-  _objectsA.append(po.copy());
-  _objectsA.append(so.copy());
-
-  _objectsB = _objectsA;
+  _objects.append(new PhysicalObject(po));
+  _objects.append(new SphericalObject(so));
 
   return true;
 }
@@ -63,7 +62,6 @@ bool Universe::loadPhysicalObjects() {
 void Universe::resetRuntimeData() {
   _currentTick = 0;
   _elapsedTime = 0.0;
-  _objectsAAreCurrent = true;
 }
 
 // tick():
@@ -83,53 +81,46 @@ void Universe::resetRuntimeData() {
 
 void Universe::tick() {
   cout << "tick " << _currentTick
-      << ", objects A count: " << _objectsA.count()
+      << ", objects count: " << _objects.size()
       << endl;
 
-  PhysicalObjectsContainer & objectsCurr = currentObjects();
-  PhysicalObjectsContainer & objectsNext = nextObjects();
-  ASSERT(objectsCurr.isCompatibleWith(objectsNext));
+  // TODO: poprawić to!
 
-  PhysicalObjectsContainer::IteratorT iterCurr = objectsCurr._objects.begin();
-  PhysicalObjectsContainer::IteratorT iterNext = objectsNext._objects.begin();
-
-  while(iterCurr != objectsCurr._objects.end()) {
-    Vector gravityForce;
-    Vector otherForce;
-
-    for(PhysicalObjectsContainer::IteratorT iterCurrOther = objectsCurr._objects.begin();
-        iterCurrOther != objectsCurr._objects.end();
-        ++iterCurrOther) {
-      if(iterCurr == iterCurrOther) {
-        continue;
-      }
-
-//      Vector gf = (*iterCurr)->getGravityForce(**iterCurrOther);
-//      cout << "gf: " << gf << endl;
-
-      gravityForce = gravityForce + (*iterCurr)->getGravityForce(**iterCurrOther);
-//      otherForce = otherForce + computeOtherForce(**iterCurr, **iterCurrOther);
-    }
-
-    cout << "gravityForce: " << gravityForce << endl;
-
-    ++iterCurr;
-    ++iterNext;
-  }
-
-  _objectsAAreCurrent = !_objectsAAreCurrent;
-  ++_currentTick;
-  _elapsedTime += _timeUnit;
-
-  objectsNext._tick = _currentTick;
-  objectsNext._elapsedTime = _elapsedTime;
+//  PhysicalObjectsContainer & objectsCurr = currentObjects();
+//  PhysicalObjectsContainer & objectsNext = nextObjects();
+//  ASSERT(objectsCurr.isCompatibleWith(objectsNext));
+//
+//  PhysicalObjectsContainer::IteratorT iterCurr = objectsCurr._objects.begin();
+//  PhysicalObjectsContainer::IteratorT iterNext = objectsNext._objects.begin();
+//
+//  while(iterCurr != objectsCurr._objects.end()) {
+//    Vector gravityForce;
+//    Vector otherForce;
+//
+//    for(PhysicalObjectsContainer::IteratorT iterCurrOther = objectsCurr._objects.begin();
+//        iterCurrOther != objectsCurr._objects.end();
+//        ++iterCurrOther) {
+//      if(iterCurr == iterCurrOther) {
+//        continue;
+//      }
+//
+////      Vector gf = (*iterCurr)->getGravityForce(**iterCurrOther);
+////      cout << "gf: " << gf << endl;
+//
+//      gravityForce = gravityForce + (*iterCurr)->getGravityForce(**iterCurrOther);
+////      otherForce = otherForce + computeOtherForce(**iterCurr, **iterCurrOther);
+//    }
+//
+//    cout << "gravityForce: " << gravityForce << endl;
+//
+//    ++iterCurr;
+//    ++iterNext;
+//  }
+//
+//  _objectsAAreCurrent = !_objectsAAreCurrent;
+//  ++_currentTick;
+//  _elapsedTime += _timeUnit;
+//
+//  objectsNext._tick = _currentTick;
+//  objectsNext._elapsedTime = _elapsedTime;
 }
-
-PhysicalObjectsContainer & Universe::currentObjects() {
-  return _objectsAAreCurrent ? _objectsA : _objectsB;
-}
-
-PhysicalObjectsContainer & Universe::nextObjects() {
-  return _objectsAAreCurrent ? _objectsB : _objectsA;
-}
-

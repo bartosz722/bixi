@@ -10,25 +10,23 @@ class PhysicalObject {
 public:
   PhysicalObject();
   virtual ~PhysicalObject();
+  //PhysicalObject(PhysicalObject&) = default; // c++11
 
   PhysicalObjectType getType() const { return _type; }
-  virtual PhysicalObject * copy() const; // c++11 unique_ptr
-  void copyFrom(const PhysicalObject & src);
-
   Vector getGravityForce(const PhysicalObject & other) const;
 
-  // Should be used only for unit tests.
-  bool equals(const PhysicalObject & other) const;
+  // Moves object to next state and clears next state variables
+  virtual void moveToNextState();
 
   // State:
   double _mass; // kg
   Vector _position; // m
   Vector _speed; // m/s, relative to [0,0,0]
 
-protected:
-  virtual void copyDataFrom(const PhysicalObject & src);
-  virtual bool dataEquals(const PhysicalObject & other) const;
+  // Next state variables:
+  Vector _force;
 
+protected:
   PhysicalObjectType _type;
 
 private:
