@@ -53,8 +53,8 @@ bool Universe::loadPhysicalObjects() {
   so._position = Vector(0, 0, 0);
   so._radius = 10;
 
-  _objects.append(new PhysicalObject(po));
-  _objects.append(new SphericalObject(so));
+  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(po)));
+  _objects.insert(unique_ptr<PhysicalObject>(new SphericalObject(so)));
 
   return true;
 }

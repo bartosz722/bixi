@@ -3,7 +3,7 @@
 SphericalObject::SphericalObject()
   : _radius(0.0)
 {
-  _type = PhysicalObjectType_SphericalObject;
+  _type = PhysicalObjectType::SphericalObject;
 }
 
 SphericalObject::~SphericalObject() {

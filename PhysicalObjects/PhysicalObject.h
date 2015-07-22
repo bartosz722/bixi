@@ -9,8 +9,8 @@
 class PhysicalObject {
 public:
   PhysicalObject();
+  PhysicalObject(const PhysicalObject &) = default;
   virtual ~PhysicalObject();
-  //PhysicalObject(PhysicalObject&) = default; // c++11
 
   PhysicalObjectType getType() const { return _type; }
   Vector getGravityForce(const PhysicalObject & other) const;
@@ -30,7 +30,7 @@ protected:
   PhysicalObjectType _type;
 
 private:
-  void operator=(PhysicalObject) {} // c++11 delete
+  void operator=(PhysicalObject) = delete;
 
 };
 

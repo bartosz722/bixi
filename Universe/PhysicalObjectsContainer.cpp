@@ -1,6 +1,7 @@
+#include <utility>
 #include "PhysicalObjectsContainer.h"
 
-void PhysicalObjectsContainer::append(PhysicalObject * po) {
-  push_back(po);
+void PhysicalObjectsContainer::insert(std::unique_ptr<PhysicalObject> && po) {
+  push_back(std::move(po));
 }
 

@@ -1,6 +1,7 @@
 #include "PhysicalObject.h"
 #include "SphericalObject.h"
 #include "PhysicalDefinitions.h"
+#include "BasicDefinitions.h"
 
 #include <iostream>
 #include <cmath>
@@ -36,6 +37,8 @@ void test() {
     double g = silaNaCzlowieka / czlowiek._mass;
     cout << "g: " << g << endl;
 
-    cout << "types: " << czlowiek.getType() << ", " << ziemia.getType() << endl;
+    cout << "types: " << enumValue(czlowiek.getType())
+        << ", " << enumValue(ziemia.getType()) << endl;
   }
+
 }

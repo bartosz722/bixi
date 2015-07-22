@@ -4,7 +4,7 @@
 
 PhysicalObject::PhysicalObject()
   : _mass(0.0)
-  , _type(PhysicalObjectType_PhysicalObject)
+  , _type(PhysicalObjectType::PhysicalObject)
 {
 }
 

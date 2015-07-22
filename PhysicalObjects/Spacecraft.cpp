@@ -10,7 +10,7 @@
 Spacecraft::Spacecraft()
   : _deltaMass(0.0)
 {
-  _type = PhysicalObjectType_Spacecraft;
+  _type = PhysicalObjectType::Spacecraft;
 }
 
 Spacecraft::~Spacecraft() {
