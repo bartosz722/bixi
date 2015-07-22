@@ -28,6 +28,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bixi/Universe}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bixi/Utilities}&quot;"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.965236982" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cplusplus=201103L"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.941734368" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.366314572" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -55,16 +58,6 @@
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1551272463" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
-						</toolChain>
-					</folderInfo>
-					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.2007267443.702767444" name="/" resourcePath="UnitTests">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1435426698" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug" unusedChildren="">
-							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1481862284" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base.474828316"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.363358375" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.272753563"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1825526583" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.366314572"/>
-							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.588182453" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1274416612"/>
-							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1421322155" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1782173968"/>
-							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.405508893" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug.1998501798"/>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
@@ -100,6 +93,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bixi/PhysicalObjects}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bixi/Universe}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bixi/Utilities}&quot;"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1045584666" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__cplusplus=201103L"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1315364131" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

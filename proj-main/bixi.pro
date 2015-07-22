@@ -5,7 +5,8 @@
 TEMPLATE = app
 TARGET = bixi
 INCLUDEPATH += . ../PhysicalObjects ../Utilities ../Universe
-CONFIG = -qt
+CONFIG -= qt
+CONFIG += c++11
 
 # Input
 HEADERS += ../PhysicalObjects/PhysicalObject.h \

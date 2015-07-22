@@ -7,6 +7,7 @@ TARGET = bixi-unit-tests
 INCLUDEPATH += . ../PhysicalObjects ../Utilities ../UnitTests ../Universe
 LIBS += -lCppUTest
 CONFIG -= qt
+CONFIG += c++11
 
 # Input
 HEADERS += ../PhysicalObjects/PhysicalObject.h \
