@@ -2,15 +2,19 @@
 #include "Vector.h"
 
 Vector::Vector() {
-  for(int i=0; i<3; ++i) {
-    v[i] = 0.0;
-  }
+  clear();
 }
 
 Vector::Vector(double x, double y, double z) {
   v[0] = x;
   v[1] = y;
   v[2] = z;
+}
+
+void Vector::clear() {
+  for(int i=0; i<3; ++i) {
+    v[i] = 0.0;
+  }
 }
 
 bool Vector::operator==(const Vector & other) const {

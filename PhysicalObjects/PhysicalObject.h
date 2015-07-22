@@ -13,10 +13,12 @@ public:
   virtual ~PhysicalObject();
 
   PhysicalObjectType getType() const { return _type; }
+  int getId() const { return _id; }
+  // Attraction of this object by other object
   Vector getGravityForce(const PhysicalObject & other) const;
 
-  // Moves object to next state and clears next state variables
   virtual void moveToNextState();
+  virtual void clearNextStateVariables();
 
   // State:
   double _mass; // kg
@@ -32,6 +34,9 @@ protected:
 private:
   void operator=(PhysicalObject) = delete;
 
+  static int _nextId; // synch
+
+  int _id;
 };
 
 #endif /* PHYSICALOBJECT_H_ */

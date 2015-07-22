@@ -7,12 +7,9 @@
 using namespace std;
 
 Universe::Universe() {
-  // TODO Auto-generated constructor stub
-
 }
 
 Universe::~Universe() {
-  // TODO Auto-generated destructor stub
 }
 
 bool Universe::start() {
@@ -30,7 +27,7 @@ bool Universe::start() {
 
   while(true) {
     tick();
-    if(_currentTick >= 10) {
+    if(_currentTick >= 3) {
       break;
     }
   }
@@ -48,14 +45,20 @@ bool Universe::loadPhysicalObjects() {
   po._mass = 71.5;
   po._position = Vector(1000, 1000, 1000);
 
+  PhysicalObject po2;
+  po2._mass = 201;
+  po2._position = Vector(2000, 3000, 4000);
+
   SphericalObject so;
   so._mass = 1000 * 1000;
   so._position = Vector(0, 0, 0);
   so._radius = 10;
 
   _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(po)));
+  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(po2)));
   _objects.insert(unique_ptr<PhysicalObject>(new SphericalObject(so)));
 
+  cout << "objects loaded, count: " << _objects.size() << endl;
   return true;
 }
 
@@ -64,6 +67,7 @@ void Universe::resetRuntimeData() {
   _elapsedTime = 0.0;
 }
 
+// To jest częściowo nieaktualne:
 // tick():
   // iteracja po obiektach
     // iteracja po obiektach
@@ -80,47 +84,27 @@ void Universe::resetRuntimeData() {
 // - liczniki (np. czas między zdarzeniami)
 
 void Universe::tick() {
-  cout << "tick " << _currentTick
-      << ", objects count: " << _objects.size()
-      << endl;
+  cout << "tick " << _currentTick  << endl;
 
-  // TODO: poprawić to!
+  // Calculate gravity force
+  for(auto it1 = _objects.begin(); it1 != _objects.end(); ++it1) {
+    PhysicalObject & obj1 = **it1;
+    for(auto it2 = it1 + 1; it2 != _objects.end(); ++it2) {
+      PhysicalObject & obj2 = **it2;
+      Vector gForce = obj1.getGravityForce(obj2);
+      obj1._force = obj1._force + gForce;
+      obj2._force = obj2._force + gForce * -1.0;
+      cout << "force between obj " << obj1.getId() << " and obj " << obj2.getId()
+          << ": " << gForce << endl;
+    }
+  }
 
-//  PhysicalObjectsContainer & objectsCurr = currentObjects();
-//  PhysicalObjectsContainer & objectsNext = nextObjects();
-//  ASSERT(objectsCurr.isCompatibleWith(objectsNext));
-//
-//  PhysicalObjectsContainer::IteratorT iterCurr = objectsCurr._objects.begin();
-//  PhysicalObjectsContainer::IteratorT iterNext = objectsNext._objects.begin();
-//
-//  while(iterCurr != objectsCurr._objects.end()) {
-//    Vector gravityForce;
-//    Vector otherForce;
-//
-//    for(PhysicalObjectsContainer::IteratorT iterCurrOther = objectsCurr._objects.begin();
-//        iterCurrOther != objectsCurr._objects.end();
-//        ++iterCurrOther) {
-//      if(iterCurr == iterCurrOther) {
-//        continue;
-//      }
-//
-////      Vector gf = (*iterCurr)->getGravityForce(**iterCurrOther);
-////      cout << "gf: " << gf << endl;
-//
-//      gravityForce = gravityForce + (*iterCurr)->getGravityForce(**iterCurrOther);
-////      otherForce = otherForce + computeOtherForce(**iterCurr, **iterCurrOther);
-//    }
-//
-//    cout << "gravityForce: " << gravityForce << endl;
-//
-//    ++iterCurr;
-//    ++iterNext;
-//  }
-//
-//  _objectsAAreCurrent = !_objectsAAreCurrent;
-//  ++_currentTick;
-//  _elapsedTime += _timeUnit;
-//
-//  objectsNext._tick = _currentTick;
-//  objectsNext._elapsedTime = _elapsedTime;
+  for(auto & po : _objects) {
+    cout << "force of object " << po->getId() << ": " << po->_force << endl;
+    po->moveToNextState();
+    po->clearNextStateVariables();
+  }
+
+  ++_currentTick;
+  _elapsedTime += _timeUnit;
 }

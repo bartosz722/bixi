@@ -2,10 +2,13 @@
 #include "PhysicalDefinitions.h"
 #include "Assert.h"
 
+int PhysicalObject::_nextId = 0;
+
 PhysicalObject::PhysicalObject()
   : _mass(0.0)
   , _type(PhysicalObjectType::PhysicalObject)
 {
+  _id = _nextId++;
 }
 
 PhysicalObject::~PhysicalObject() {
@@ -29,4 +32,8 @@ Vector PhysicalObject::getGravityForce(const PhysicalObject & other) const {
 
 void PhysicalObject::moveToNextState() {
   // TODO
+}
+
+void PhysicalObject::clearNextStateVariables() {
+  _force.clear();
 }

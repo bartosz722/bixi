@@ -8,6 +8,7 @@ public:
   Vector();
   Vector(double x, double y, double z);
 
+  void clear(); // TODO: unit test :)
   bool operator==(const Vector & other) const;
   Vector operator+(const Vector & other) const;
   Vector operator-(const Vector & other) const;
