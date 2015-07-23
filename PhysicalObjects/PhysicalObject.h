@@ -16,6 +16,8 @@ public:
   int getId() const { return _id; }
   // Attraction of this object by other object
   Vector getGravityForce(const PhysicalObject & other) const;
+  // Distance vector pointed to this
+  Vector distanceTo(const PhysicalObject & other) const;
 
   virtual void moveToNextState(double deltaTime);
   virtual void clearNextStateVariables();

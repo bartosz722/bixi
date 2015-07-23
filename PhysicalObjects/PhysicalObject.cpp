@@ -15,7 +15,7 @@ PhysicalObject::~PhysicalObject() {
 }
 
 Vector PhysicalObject::getGravityForce(const PhysicalObject & other) const {
-  Vector distanceVect = _position - other._position;
+  Vector distanceVect = distanceTo(other);
   double distance = distanceVect.length();
   double distance_pow2 = distanceVect.length_pow2();
 
@@ -28,6 +28,10 @@ Vector PhysicalObject::getGravityForce(const PhysicalObject & other) const {
   Vector forceVect = distanceVect * (force * -1.0 / distance);
 
   return forceVect;
+}
+
+Vector PhysicalObject::distanceTo(const PhysicalObject & other) const {
+  return _position - other._position;
 }
 
 void PhysicalObject::moveToNextState(double deltaTime) {
