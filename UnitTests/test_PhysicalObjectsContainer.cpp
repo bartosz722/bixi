@@ -15,7 +15,7 @@ TEST_GROUP(PhysicalObjectsContainer) {
     PhysicalObject * o = new PhysicalObject;;
     o->_mass = 1.11 * c;
     o->_position = Vector(5.5 * c, 6.6 * c, 7.7 * c);
-    o->_speed =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
+    o->_velocity =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
     return o;
   }
 
@@ -24,7 +24,7 @@ TEST_GROUP(PhysicalObjectsContainer) {
     SphericalObject * so = new SphericalObject;
     so->_mass = 1.11 * c;
     so->_position = Vector(5.5 * c, 6.6 * c, 7.7 * c);
-    so->_speed =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
+    so->_velocity =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
     so->_radius = 71.3 * c;
     return so;
   }

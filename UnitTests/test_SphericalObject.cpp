@@ -10,7 +10,7 @@ TEST_GROUP(SphericalObject) {
     SphericalObject so;
     so._mass = 1.11 * c;
     so._position = Vector(5.5 * c, 6.6 * c, 7.7 * c);
-    so._speed =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
+    so._velocity =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
     so._radius = 71.3 * c;
     return so;
   }
@@ -28,7 +28,7 @@ TEST(SphericalObject, CopyConstructor) {
   SphericalObject so1;
   so1._mass = 221.11;
   so1._position = Vector(225.5, -26.6, 227.7);
-  so1._speed =  Vector(255.21, -43.6, 53.01);
+  so1._velocity =  Vector(255.21, -43.6, 53.01);
   so1._radius = 871.3;
   SphericalObject so2(so1);
   CHECK(so1.equals(so2));

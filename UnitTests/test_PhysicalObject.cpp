@@ -46,7 +46,7 @@ TEST(PhysicalObject, Copy) {
   PhysicalObject po1, *po2;
   po1._mass = 1.11;
   po1._position = Vector(5.5, 6.6, 7.7);
-  po1._speed =  Vector(15.5, 16.6, 17.7);
+  po1._velocity =  Vector(15.5, 16.6, 17.7);
   po2 = po1.copy();
   CHECK(po1.equals(*po2));
   delete po2;
@@ -56,7 +56,7 @@ TEST(PhysicalObject, CopyConstructor) {
   PhysicalObject po1;
   po1._mass = 1.11;
   po1._position = Vector(5.5, 6.6, 7.7);
-  po1._speed =  Vector(15.5, 16.6, 17.7);
+  po1._velocity =  Vector(15.5, 16.6, 17.7);
   PhysicalObject po2(po1);
   CHECK(po1.equals(po2));
 }
@@ -65,10 +65,10 @@ TEST(PhysicalObject, CopyFrom) {
   PhysicalObject po1, po2;
   po1._mass = 1.11;
   po1._position = Vector(5.5, 6.6, 7.7);
-  po1._speed =  Vector(15.5, 16.6, 17.7);
+  po1._velocity =  Vector(15.5, 16.6, 17.7);
   po2._mass = -771.11;
   po2._position = Vector(-885.5, -996.6, -117.7);
-  po2._speed =  Vector(1005.05, 1116.16, 1227.27);
+  po2._velocity =  Vector(1005.05, 1116.16, 1227.27);
   po1.copyFrom(po2);
   CHECK(po1.equals(po2));
 }

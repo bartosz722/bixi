@@ -24,6 +24,9 @@ private:
   void resetRuntimeData();
   void tick();
 
+  void printObjects();
+  void printAfterTick();
+
   // settings:
   double _timeUnit; // s; tick time unit
 

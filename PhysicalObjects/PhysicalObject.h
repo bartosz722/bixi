@@ -17,13 +17,13 @@ public:
   // Attraction of this object by other object
   Vector getGravityForce(const PhysicalObject & other) const;
 
-  virtual void moveToNextState();
+  virtual void moveToNextState(double deltaTime);
   virtual void clearNextStateVariables();
 
   // State:
   double _mass; // kg
   Vector _position; // m
-  Vector _speed; // m/s, relative to [0,0,0]
+  Vector _velocity; // m/s, relative to [0,0,0]
 
   // Next state variables:
   Vector _force;
