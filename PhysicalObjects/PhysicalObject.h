@@ -9,7 +9,7 @@
 class PhysicalObject {
 public:
   PhysicalObject();
-  PhysicalObject(const PhysicalObject &) = default;
+  PhysicalObject(const PhysicalObject & other);
   virtual ~PhysicalObject();
 
   PhysicalObjectType getType() const { return _type; }
@@ -34,6 +34,8 @@ protected:
   PhysicalObjectType _type;
 
 private:
+  static int getNextId();
+
   void operator=(PhysicalObject) = delete;
 
   static int _nextId; // synch

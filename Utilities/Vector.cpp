@@ -26,6 +26,15 @@ bool Vector::operator==(const Vector & other) const {
   return true;
 }
 
+bool Vector::equals(const Vector & other, double tolerance) const {
+  for(int i=0; i<3; ++i) {
+    if(fabs(v[i] - other.v[i]) > tolerance) {
+      return false;
+    }
+  }
+  return true;
+}
+
 Vector Vector::operator+(const Vector & other) const {
   Vector ret;
   for(int i=0; i<3; ++i) {

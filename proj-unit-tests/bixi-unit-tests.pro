@@ -30,9 +30,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../UnitTests/test_SphericalObject.cpp \
            ../UnitTests/test_Vector.cpp \
            ../UnitTests/unit_tests_tools.cpp \
-           #../Universe/main.cpp \
            ../Universe/PhysicalObjectsContainer.cpp \
-           #../Universe/test.cpp \
            ../Universe/Universe.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp

@@ -8,8 +8,9 @@ public:
   Vector();
   Vector(double x, double y, double z);
 
-  void clear(); // TODO: unit test :)
+  void clear();
   bool operator==(const Vector & other) const;
+  bool equals(const Vector & other, double tolerance) const;
   Vector operator+(const Vector & other) const;
   Vector operator-(const Vector & other) const;
   Vector operator*(double factor) const;
