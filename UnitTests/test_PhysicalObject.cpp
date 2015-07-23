@@ -1,16 +1,11 @@
 #include <cmath>
 #include "CppUTest/TestHarness.h"
-#include "unit_tests_tools.h"
 #include "PhysicalObject.h"
+#include "PhysicalDefinitions.h"
 
 TEST_GROUP(PhysicalObject) {
   void setup() {
     c = 0;
-  }
-
-  PhysicalObject * createPhysicalObject() {
-    // TODO: do kasacji po poprawieniu testów GetGravityForce*
-    return new PhysicalObject();
   }
 
   PhysicalObject * getSomePhysicalObject() {
@@ -39,38 +34,18 @@ TEST(PhysicalObject, CopyConstructor) {
 }
 
 TEST(PhysicalObject, GetGravityForce) {
-  // TODO uniezależnić od wartości stałej G
-  PhysicalObject * pho1 = createPhysicalObject();
-  PhysicalObject * pho2 = createPhysicalObject();
+  PhysicalObject earth;
+  earth._mass = 5.972 * pow(10, 24);
+  earth._position = Vector(100, 100, 100);
 
-  pho1->_mass = 8 * pow(10, 10);
-  pho2->_mass = 11 * pow(10, 10);
+  PhysicalObject man;
+  man._mass = 70;
+  man._position = Vector(100+6370000, 100, 100);
 
-  pho1->_position = Vector(1000, 1000, 1000);
-  pho2->_position = Vector(2000, 2000, 2000);
+  const double gForceAbsOK = 1030241344.0 * 10000.0 * constG;
 
-  Vector gForce = pho1->getGravityForce(*pho2);
-  const double gfx = 113025.5374;
-  CHECK(gForce.equals(Vector(gfx, gfx, gfx), 0.00005));
-  DOUBLES_EQUAL(195765.9733, gForce.length(), 0.00005);
-
-  delete pho1;
-  delete pho2;
-}
-
-TEST(PhysicalObject, GetGravityForce2) {
-  // TODO uniezależnić od wartości stałej G
-  PhysicalObject * earth = createPhysicalObject();
-  PhysicalObject * man = createPhysicalObject();
-  earth->_mass = 5.97219 * pow(10, 24);
-  man->_mass = 70;
-  man->_position = Vector(6371000, 0, 0);
-  Vector forceOnManV = man->getGravityForce(*earth);
-  double forceOnMan = forceOnManV.length();
-  double g = forceOnMan / man->_mass;
-  DOUBLES_EQUAL(9.81961, g, 0.000005);
-  delete earth;
-  delete man;
+  Vector gForceVect = man.getGravityForce(earth);
+  CHECK(gForceVect.equals(Vector(-gForceAbsOK, 0, 0), gForceAbsOK * 0.000000001));
 }
 
 TEST(PhysicalObject, DistanceTo) {
