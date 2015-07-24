@@ -11,6 +11,7 @@ TEST_GROUP(PhysicalObject) {
   PhysicalObject * getSomePhysicalObject() {
     ++c;
     PhysicalObject * o = new PhysicalObject;;
+    o->setId(c);
     o->_mass = 1.11 * c;
     o->_position = Vector(5.5 * c, 6.6 * c, 7.7 * c);
     o->_velocity =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
@@ -20,18 +21,6 @@ TEST_GROUP(PhysicalObject) {
 
   int c;
 };
-
-TEST(PhysicalObject, CopyConstructor) {
-  PhysicalObject * po = getSomePhysicalObject();
-  PhysicalObject po2(*po);
-  CHECK_FALSE(po->getId() == po2.getId());
-  CHECK(po->getType() == po2.getType());
-  CHECK(po->_mass == po2._mass);
-  CHECK(po->_position == po2._position);
-  CHECK(po->_velocity == po2._velocity);
-  CHECK(po->_force == po2._force);
-  delete po;
-}
 
 TEST(PhysicalObject, GetGravityForce) {
   PhysicalObject earth;
@@ -73,4 +62,10 @@ TEST(PhysicalObject, ClearNextStateVariables) {
   po._force = Vector(1, 2, 3);
   po.clearNextStateVariables();
   CHECK(po._force == Vector(0, 0, 0));
+}
+
+TEST(PhysicalObject, GetSetId) {
+  PhysicalObject po;
+  po.setId(77);
+  CHECK_EQUAL(77, po.getId());
 }

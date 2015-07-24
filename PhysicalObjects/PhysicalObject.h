@@ -9,11 +9,13 @@
 class PhysicalObject {
 public:
   PhysicalObject();
-  PhysicalObject(const PhysicalObject & other);
+  PhysicalObject(const PhysicalObject & other) = default;
   virtual ~PhysicalObject();
 
   PhysicalObjectType getType() const { return _type; }
   int getId() const { return _id; }
+  void setId(int id) { _id = id; }
+
   // Attraction of this object by other object
   Vector getGravityForce(const PhysicalObject & other) const;
   // Distance vector pointed to this
@@ -34,11 +36,7 @@ protected:
   PhysicalObjectType _type;
 
 private:
-  static int getNextId();
-
   void operator=(PhysicalObject) = delete;
-
-  static int _nextId; // synch
 
   int _id;
 };
