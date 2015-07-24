@@ -12,7 +12,13 @@ int main() {
 //  test();
 
   Universe universe;
-  universe.start();
+
+  if(universe.loadSettings()) {
+    if(universe.loadPhysicalObjects()) {
+      universe.start();
+      universe.waitForFinish();
+    }
+  }
 
   return 0;
 }

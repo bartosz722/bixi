@@ -31,6 +31,6 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../UnitTests/test_Vector.cpp \
            ../UnitTests/unit_tests_tools.cpp \
            ../Universe/PhysicalObjectsContainer.cpp \
-           ../Universe/Universe.cpp \
+           #../Universe/Universe.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp

@@ -7,6 +7,8 @@ TARGET = bixi
 INCLUDEPATH += . ../PhysicalObjects ../Utilities ../Universe
 CONFIG -= qt
 CONFIG += c++11
+QMAKE_CXXFLAGS += -pthread
+LIBS += -pthread
 
 # Input
 HEADERS += ../PhysicalObjects/PhysicalObject.h \

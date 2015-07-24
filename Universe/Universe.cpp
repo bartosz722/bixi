@@ -15,31 +15,6 @@ Universe::Universe() {
 Universe::~Universe() {
 }
 
-bool Universe::start() {
-  cout << "Universe::start()\n";
-
-  if(!loadSettings()) {
-    return false;
-  }
-
-  if(!loadPhysicalObjects()) {
-    return false;
-  }
-
-  resetRuntimeData();
-
-  while(true) {
-    tick();
-    printAfterTick();
-    if(_collisionDetected) {
-      printObjects();
-      break; // We don't know what to do
-    }
-  }
-
-  return true;
-}
-
 bool Universe::loadSettings() {
   _timeUnit = 1.0;
   _detectCollision = true;
@@ -55,17 +30,17 @@ bool Universe::loadPhysicalObjects() {
 
   PhysicalObject man1;
   man1._mass = 70;
-  man1._position = Vector(earth._radius, 0, 0);
-  man1._velocity = Vector(100, 0, 0);
+  man1._position = Vector(earth._radius + 10, 0, 0);
+  man1._velocity = Vector(0, 0, 0);
 
   PhysicalObject iss;
   iss._mass = 417289;
-  iss._position = Vector((earth._radius + 430)*1000, 0, 0);
+  iss._position = Vector(earth._radius + 430*1000, 0, 0);
   iss._velocity = Vector(0, 7706, 0);
 
   _objects.insert(unique_ptr<PhysicalObject>(new SphericalObject(earth)));
-  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(man1)));
-//  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(iss)));
+//  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(man1)));
+  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(iss)));
 
   for(auto const & po : _objects) {
     ASSERT(po->_mass != 0.0);
@@ -74,6 +49,30 @@ bool Universe::loadPhysicalObjects() {
   cout << "objects loaded, count: " << _objects.size() << endl;
   printObjects();
   return true;
+}
+
+bool Universe::start() {
+  cout << "Universe::start()\n";
+  resetRuntimeData();
+  _thread = thread(&Universe::spacetime, this);
+  return true;
+}
+
+void Universe::waitForFinish() {
+  _thread.join();
+}
+
+void Universe::spacetime() {
+  cout << "Universe::spacetime()\n";
+  while(true) {
+    lock_guard<mutex> locker(_mutexData);
+    tick();
+    printAfterTick();
+    if(_collisionDetected) {
+      printObjects();
+      break; // We don't know what to do
+    }
+  }
 }
 
 void Universe::resetRuntimeData() {
@@ -92,7 +91,7 @@ void Universe::printObjects() {
 }
 
 void Universe::printAfterTick() {
-  static const TickT freq = 1;//100;
+  static const TickT freq = 100;
   static const int maxPrintCount = 50;
 
   static int printCount = 0;
