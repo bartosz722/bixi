@@ -24,9 +24,9 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
 SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../PhysicalObjects/Spacecraft.cpp \
            ../PhysicalObjects/SphericalObject.cpp \
-           ../Universe/main.cpp \
            ../Universe/PhysicalObjectsContainer.cpp \
-           ../Universe/test.cpp \
            ../Universe/Universe.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
-           ../Utilities/Vector.cpp
+           ../Utilities/Vector.cpp \
+           ../ProjConsole/main.cpp \
+           ../ProjConsole/test.cpp
