@@ -4,22 +4,14 @@
 #include "PhysicalDefinitions.h"
 
 TEST_GROUP(PhysicalObject) {
-  void setup() {
-    c = 0;
+  void checkObjectsEqual(const PhysicalObject & po1, const PhysicalObject & po2) {
+    CHECK(po1.getType() == po2.getType());
+    CHECK(po1.getId() == po2.getId());
+    CHECK(po1._mass == po2._mass);
+    CHECK(po1._velocity == po2._velocity);
+    CHECK(po1._position == po2._position);
+    CHECK(po1._force == po2._force);
   }
-
-  PhysicalObject * getSomePhysicalObject() {
-    ++c;
-    PhysicalObject * o = new PhysicalObject;;
-    o->setId(c);
-    o->_mass = 1.11 * c;
-    o->_position = Vector(5.5 * c, 6.6 * c, 7.7 * c);
-    o->_velocity =  Vector(-2.21 * c, -3.6 * c, 5.01 * c);
-    o->_force = Vector(8.09 * c, -1.12 * c, -99.23 *c);
-    return o;
-  }
-
-  int c;
 };
 
 TEST(PhysicalObject, GetGravityForce) {
@@ -68,4 +60,28 @@ TEST(PhysicalObject, GetSetId) {
   PhysicalObject po;
   po.setId(77);
   CHECK_EQUAL(77, po.getId());
+}
+
+TEST(PhysicalObject, Copy) {
+  PhysicalObject po;
+  po.setId(11);
+  po._mass = 5;
+  po._velocity = Vector(1, 2, 3);
+  po._position = Vector(100, 200, 300);
+  po._force = Vector(10, 20, 30);
+
+  std::unique_ptr<PhysicalObject> cp = po.copy();
+  checkObjectsEqual(po, *cp);
+}
+
+TEST(PhysicalObject, CopyFrom) {
+  PhysicalObject po, po2;
+  po.setId(11);
+  po._mass = 5;
+  po._velocity = Vector(1, 2, 3);
+  po._position = Vector(100, 200, 300);
+  po._force = Vector(10, 20, 30);
+
+  po2.copyFrom(po);
+  checkObjectsEqual(po, po2);
 }

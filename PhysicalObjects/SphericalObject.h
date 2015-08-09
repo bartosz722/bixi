@@ -8,9 +8,13 @@ public:
   SphericalObject();
   virtual ~SphericalObject();
 
+  virtual std::unique_ptr<PhysicalObject> copy() const;
+  virtual void copyFrom(const PhysicalObject & other);
+
   double _radius; // m
 
 protected:
+  SphericalObject(const SphericalObject & other) = default;
 
 private:
 

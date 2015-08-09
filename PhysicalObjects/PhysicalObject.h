@@ -1,6 +1,7 @@
 #ifndef PHYSICALOBJECT_H_
 #define PHYSICALOBJECT_H_
 
+#include <memory>
 #include "Vector.h"
 #include "PhysicalObjectType.h"
 
@@ -9,8 +10,10 @@
 class PhysicalObject {
 public:
   PhysicalObject();
-  PhysicalObject(const PhysicalObject & other) = default;
   virtual ~PhysicalObject();
+
+  virtual std::unique_ptr<PhysicalObject> copy() const;
+  virtual void copyFrom(const PhysicalObject & other);
 
   PhysicalObjectType getType() const { return _type; }
   int getId() const { return _id; }
@@ -33,6 +36,8 @@ public:
   Vector _force;
 
 protected:
+  PhysicalObject(const PhysicalObject & other) = default;
+
   PhysicalObjectType _type;
 
 private:

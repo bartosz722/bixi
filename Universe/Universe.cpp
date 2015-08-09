@@ -38,9 +38,9 @@ bool Universe::loadPhysicalObjects() {
   iss._position = Vector(earth._radius + 430*1000, 0, 0);
   iss._velocity = Vector(0, 7706, 0);
 
-  _objects.insert(unique_ptr<PhysicalObject>(new SphericalObject(earth)));
-//  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(man1)));
-  _objects.insert(unique_ptr<PhysicalObject>(new PhysicalObject(iss)));
+  _objects.insert(earth);
+//  _objects.insert(man1));
+  _objects.insert(iss);
 
   for(auto const & po : _objects) {
     ASSERT(po->_mass != 0.0);

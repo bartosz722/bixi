@@ -5,3 +5,6 @@
 
 TEST_GROUP(SphericalObject) {
 };
+
+//TODO: uzupełnić unit testy
+

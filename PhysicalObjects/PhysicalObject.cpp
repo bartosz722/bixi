@@ -12,6 +12,15 @@ PhysicalObject::PhysicalObject()
 PhysicalObject::~PhysicalObject() {
 }
 
+std::unique_ptr<PhysicalObject> PhysicalObject::copy() const {
+  return std::unique_ptr<PhysicalObject>(new PhysicalObject(*this));
+}
+
+void PhysicalObject::copyFrom(const PhysicalObject & other) {
+  ASSERT(getType() == other.getType());
+  new (this) PhysicalObject(other);
+}
+
 Vector PhysicalObject::getGravityForce(const PhysicalObject & other) const {
   Vector distanceVect = distanceTo(other);
   double distance = distanceVect.length();
