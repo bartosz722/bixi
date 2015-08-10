@@ -10,30 +10,49 @@
 using namespace std;
 
 Universe::Universe() {
+  resetSettings();
+  resetRuntimeData();
 }
 
 Universe::~Universe() {
 }
 
+void Universe::resetSettings() {
+  _timeUnit = 1.0;
+  _detectCollision = false;
+  _collisionTolerance = 0.00001;
+}
+
+void Universe::resetRuntimeData() {
+  _running = false;
+  _stopRequested = false;
+  _currentTick = 0;
+  _elapsedTime = 0.0;
+  _collisionDetected = false;
+}
+
 bool Universe::loadSettings() {
   _timeUnit = 1.0;
-  _detectCollision = true;
+  _detectCollision = false;
   _collisionTolerance = 0.00001;
   return true;
 }
 
 bool Universe::loadPhysicalObjects() {
   SphericalObject earth;
+  earth.setId(1);
   earth._mass = 5.972 * pow(10, 24);
   earth._position = Vector(0, 0, 0);
   earth._radius = 6370*1000;
 
   PhysicalObject man1;
+  man1.setId(2);
   man1._mass = 70;
   man1._position = Vector(earth._radius + 10, 0, 0);
   man1._velocity = Vector(0, 0, 0);
 
   PhysicalObject iss;
+  iss.setId(3);
   iss._mass = 417289;
   iss._position = Vector(earth._radius + 430*1000, 0, 0);
   iss._velocity = Vector(0, 7706, 0);
@@ -47,15 +66,20 @@ bool Universe::loadPhysicalObjects() {
   }
 
   cout << "objects loaded, count: " << _objects.size() << endl;
-  printObjects();
   return true;
 }
 
 bool Universe::start() {
+  ASSERT(!_stopRequested);
   cout << "Universe::start()\n";
-  resetRuntimeData();
+  setRuntimeDataToStartValues();
   _thread = thread(&Universe::spacetime, this);
   return true;
+}
+
+void Universe::stop() {
+  lock_guard<mutex> locker(_mutexData);
+  _stopRequested = true;
 }
 
 void Universe::waitForFinish() {
@@ -63,45 +87,21 @@ void Universe::waitForFinish() {
 }
 
 void Universe::spacetime() {
-  cout << "Universe::spacetime()\n";
   while(true) {
     lock_guard<mutex> locker(_mutexData);
-    tick();
-    printAfterTick();
-    if(_collisionDetected) {
-      printObjects();
-      break; // We don't know what to do
+    if(_stopRequested) {
+      break;
     }
+    tick();
   }
 }
 
-void Universe::resetRuntimeData() {
+void Universe::setRuntimeDataToStartValues() {
+  _running = true;
+  _stopRequested = false;
   _currentTick = 0;
   _elapsedTime = 0.0;
   _collisionDetected = false;
-}
-
-void Universe::printObjects() {
-  for(auto const & po : _objects) {
-    cout << "object " << po->getId()
-        << ": position " << po->_position
-        << ", velocity " << po->_velocity << " (abs " << po->_velocity.length() << ")"
-        << endl;
-  }
-}
-
-void Universe::printAfterTick() {
-  static const TickT freq = 100;
-  static const int maxPrintCount = 50;
-
-  static int printCount = 0;
-  if(_currentTick % freq == 0) {
-    cout << "tick " << _currentTick  << endl;
-    printObjects();
-    if(printCount++ >= maxPrintCount) {
-      exit(0);
-    }
-  }
 }
 
 void Universe::tick() {
@@ -158,13 +158,14 @@ bool Universe::objectsCollided(const PhysicalObject & obj1, const PhysicalObject
   // We'll detect collision only when one object has non-zero radius.
   const double distance = obj1.distanceTo(obj2).length();
   bool collision = distance < minDistance;
-
-  if(collision) {
-    cout << "After tick " << _currentTick
-        << ": collision between object " << obj1.getId() << " and " << obj2.getId()
-        << ", distance " << distance << ", minDistance " << minDistance
-        << endl;
-  }
-
   return collision;
+}
+
+void Universe::getSnapshot(Snapshot & s) {
+  lock_guard<mutex> locker(_mutexData);
+  s._running = _running;
+  s._currentTick = _currentTick;
+  s._elapsedTime = _elapsedTime;
+  s._collisionDetected = _collisionDetected;
+  s._objects = _objects;
 }

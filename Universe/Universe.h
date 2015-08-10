@@ -15,22 +15,33 @@
 
 class Universe {
 public:
+  struct Snapshot {
+    bool _running;
+    TickT _currentTick;
+    double _elapsedTime;
+    bool _collisionDetected;
+    PhysicalObjectsContainer _objects;
+  };
+
   Universe();
   ~Universe();
 
   bool loadSettings();
   bool loadPhysicalObjects();
   bool start();
+  void stop(); // can not be started after is stopped
+
   void waitForFinish();
+  void getSnapshot(Snapshot & s); // may be always called
 
 private:
-  void spacetime(); // main loop is executed here
+  void resetSettings();
   void resetRuntimeData();
+
+  void spacetime(); // main loop is executed here
+  void setRuntimeDataToStartValues();
   void tick();
   bool objectsCollided(const PhysicalObject & obj1, const PhysicalObject & obj2);
-
-  void printObjects();
-  void printAfterTick();
 
   // settings:
   double _timeUnit; // s; tick time unit
@@ -38,6 +49,8 @@ private:
   double _collisionTolerance; // factor (0--1.0]
 
   // runtime data:
+  bool _running;
+  bool _stopRequested;
   TickT _currentTick; // always counted from 0
   double _elapsedTime; // s
   // DateTimeT _beginning
@@ -48,7 +61,7 @@ private:
 
   // Thread executed after start() has finished.
   std::thread _thread;
-  // Guards runtime data and physical objects after start() has finished.
+  // Guards runtime and physical objects data while _thread is running.
   std::mutex _mutexData;
 };
 

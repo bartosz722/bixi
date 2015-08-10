@@ -18,7 +18,7 @@ void PhysicalObjectsContainer::operator=(const PhysicalObjectsContainer & other)
   const_iterator otherIt = other.begin();
   while(it != end()) {
     if(it->get() != nullptr && (*it)->getType() == (*otherIt)->getType()) {
-      (*it)->copyFrom(**otherIt);
+      (*it)->copyFrom(**otherIt); // no allocation when types are the same
     }
     else {
       *it = (*otherIt)->copy();
