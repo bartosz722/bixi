@@ -16,6 +16,7 @@
 class Universe {
 public:
   struct Snapshot {
+    Snapshot();
     bool _running;
     TickT _currentTick;
     double _elapsedTime;

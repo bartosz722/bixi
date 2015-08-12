@@ -1,8 +1,10 @@
 #include <iostream>
 #include <thread>
+#include <cmath>
 #include <GL/glut.h>
 
 #include "Universe.h"
+#include "SphericalObject.h"
 
 using namespace std;
 
@@ -16,6 +18,17 @@ void readUniverse(int value);
 
 Universe universe;
 Universe::Snapshot snapshot;
+bool doPaintPhysicalObejcts = true;
+
+const int windowWidth = 800;
+const int windowHeight = 800;
+const int repaintPeriodMs = 20;
+const double initialViewBorder = 31850000;
+const double physicalObjectSize = 0.03; // % of wiew width
+const int lineWidthPix = 3;
+const double viewBorderMargin = 0.03; // % of extreme coordinate
+
+double currentViewBorder = initialViewBorder;
 
 int main(int argc, char **argv) {
   cout << "bixi OpenGL" << endl;
@@ -62,23 +75,52 @@ void setupUniverse() {
 void setupOpenGL(int & argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-  glutInitWindowSize(800, 800);
+  glutInitWindowSize(windowWidth, windowHeight);
   glutCreateWindow("Ksztalt");
   glutDisplayFunc(paint);
   glutReshapeFunc(reshape);
 //  glutKeyboardFunc(klawiaturka);
 }
 
+void setProjectionData() {
+  double physicalObjectExtremum = 0.0;
+  for(const auto & po : snapshot._objects) {
+    const auto & pos = po->_position;
+    if(fabs(pos.v[0]) > physicalObjectExtremum) {
+      physicalObjectExtremum = fabs(pos.v[0]);
+    }
+    if(fabs(pos.v[1]) > physicalObjectExtremum) {
+      physicalObjectExtremum = fabs(pos.v[1]);
+    }
+  }
+
+  currentViewBorder = physicalObjectExtremum * (1.0 + viewBorderMargin);
+  if(currentViewBorder < initialViewBorder) {
+    currentViewBorder = initialViewBorder;
+  }
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity(); // ustaw macierz rzutowania jako jednostkową
+  glOrtho(-currentViewBorder, currentViewBorder, -currentViewBorder, currentViewBorder, -0.5, 0.5);
+}
+
 void paint() {
+  setProjectionData();
+
   glClearColor(1, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT);
+  glLineWidth(lineWidthPix);
 
   glBegin(GL_LINES);
-
   glColor3f(1.0, 0.0, 0.0);
-  glVertex3f(0, 0, 0);
-  glVertex3f(1000000, 1000000, 0);
-
+  glVertex3f(-initialViewBorder, -initialViewBorder, 0);
+  glVertex3f(initialViewBorder, -initialViewBorder, 0);
+  glVertex3f(initialViewBorder, -initialViewBorder, 0);
+  glVertex3f(initialViewBorder, initialViewBorder, 0);
+  glVertex3f(initialViewBorder, initialViewBorder, 0);
+  glVertex3f(-initialViewBorder, initialViewBorder, 0);
+  glVertex3f(-initialViewBorder, initialViewBorder, 0);
+  glVertex3f(-initialViewBorder, -initialViewBorder, 0);
   glEnd();
 
   paintPhysicalObjects();
@@ -89,18 +131,23 @@ void paint() {
 
 void reshape(int, int) {
 //  glViewport(0, 0, 800, 800);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity(); // ustaw macież rzutowania jako jednostkową
-  int const wii = 7500000;
-  glOrtho(-wii, wii, -wii, wii, -0.5, 0.5);
   paint();
 }
 
 void readUniverse(int) {
+  if(!doPaintPhysicalObejcts) {
+    return;
+  }
+
 //  cout << "readUniverse()\n";
-  glutTimerFunc(20, readUniverse, 0);
+  glutTimerFunc(repaintPeriodMs, readUniverse, 0);
 
   universe.getSnapshot(snapshot);
+  if(snapshot._collisionDetected) {
+    cout << "collision!\n";
+    doPaintPhysicalObejcts = false;
+  }
+
 //  cout << "current tick: " << snapshot._currentTick << endl;
 //  printPhysicalObjects(snapshot._objects);
 
@@ -109,14 +156,33 @@ void readUniverse(int) {
 }
 
 void paintPhysicalObjects() {
-  const int width = 8750 * 25;
+  glColor3f(0.0, 0.0, 1.0);
+
+  const double physObjDrawSize = currentViewBorder * physicalObjectSize;
+
   for(const auto & po : snapshot._objects) {
     const Vector & pos = po->_position;
-
-    glBegin(GL_LINES);
-    glColor3f(0.0, 0.0, 1.0);
-    glVertex3f(pos.v[0], pos.v[1], 0);
-    glVertex3f(pos.v[0] - width, pos.v[1] + width, 0);
-    glEnd();
+    if(po->getType() == PhysicalObjectType::SphericalObject) {
+      const double radius = static_cast<const SphericalObject &>(*po)._radius;
+      const double radiusSin = sin(M_PI_4) * radius;
+      glBegin(GL_LINES);
+      glVertex3f(pos.v[0] - radiusSin, pos.v[1] + radiusSin, 0);
+      glVertex3f(pos.v[0] + radiusSin, pos.v[1] - radiusSin, 0);
+      glVertex3f(pos.v[0] + radiusSin, pos.v[1] + radiusSin, 0);
+      glVertex3f(pos.v[0] - radiusSin, pos.v[1] - radiusSin, 0);
+      glVertex3f(pos.v[0] + radius, pos.v[1], 0);
+      glVertex3f(pos.v[0] - radius, pos.v[1], 0);
+      glVertex3f(pos.v[0], pos.v[1] + radius, 0);
+      glVertex3f(pos.v[0], pos.v[1] - radius, 0);
+      glEnd();
+    }
+    else {
+      glBegin(GL_LINES);
+      glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] + physObjDrawSize, 0);
+      glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] - physObjDrawSize, 0);
+      glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] + physObjDrawSize, 0);
+      glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] - physObjDrawSize, 0);
+      glEnd();
+    }
   }
 }

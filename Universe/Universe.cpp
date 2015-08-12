@@ -9,6 +9,10 @@
 
 using namespace std;
 
+Universe::Snapshot::Snapshot()
+  : _running(false), _currentTick(0), _elapsedTime(0.0), _collisionDetected(false)
+{}
+
 Universe::Universe() {
   resetSettings();
   resetRuntimeData();
@@ -33,7 +37,7 @@ void Universe::resetRuntimeData() {
 
 bool Universe::loadSettings() {
   _timeUnit = 1.0;
-  _detectCollision = false;
+  _detectCollision = true;
   _collisionTolerance = 0.00001;
   return true;
 }
@@ -43,6 +47,7 @@ bool Universe::loadPhysicalObjects() {
   earth.setId(1);
   earth._mass = 5.972 * pow(10, 24);
   earth._position = Vector(0, 0, 0);
+  earth._velocity = Vector(0, 0, 0);
   earth._radius = 6370*1000;
 
   PhysicalObject man1;
@@ -57,9 +62,18 @@ bool Universe::loadPhysicalObjects() {
   iss._position = Vector(earth._radius + 430*1000, 0, 0);
   iss._velocity = Vector(0, 7706, 0);
 
+  SphericalObject someRock;
+  someRock.setId(4);
+  someRock._mass = earth._mass;
+  someRock._position = Vector(earth._radius * 3, 0, 0);
+  someRock._velocity = Vector(0, 3000, 0);
+  someRock._radius = earth._radius;
+
   _objects.insert(earth);
 //  _objects.insert(man1));
   _objects.insert(iss);
+//  _objects.insert(someRock);
+
 
   for(auto const & po : _objects) {
     ASSERT(po->_mass != 0.0);
@@ -88,11 +102,15 @@ void Universe::waitForFinish() {
 
 void Universe::spacetime() {
   while(true) {
-    lock_guard<mutex> locker(_mutexData);
-    if(_stopRequested) {
-      break;
+    {
+      lock_guard<mutex> locker(_mutexData);
+      if(_stopRequested) {
+        break;
+      }
+      tick();
     }
-    tick();
+
+    this_thread::sleep_for(chrono::milliseconds(1));
   }
 }
 
