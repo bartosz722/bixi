@@ -4,7 +4,7 @@
 
 TEMPLATE = app
 TARGET = bixi
-INCLUDEPATH += . ../PhysicalObjects ../Utilities ../Universe
+INCLUDEPATH += . ../PhysicalObjects ../Utilities ../Universe ../UtilitiesGl
 CONFIG -= qt
 CONFIG += c++11
 QMAKE_CXXFLAGS += -pthread
@@ -20,7 +20,8 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Utilities/Assert.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
-           ../Utilities/Vector.h
+           ../Utilities/Vector.h \
+           ../UtilitiesGl/UtilGlDraw.h
 SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../PhysicalObjects/Spacecraft.cpp \
            ../PhysicalObjects/SphericalObject.cpp \
@@ -28,4 +29,5 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../Universe/Universe.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp \
-           ../ProjOpenGl/main.cpp
+           ../ProjOpenGl/main.cpp \
+           ../UtilitiesGl/UtilGlDraw.cpp

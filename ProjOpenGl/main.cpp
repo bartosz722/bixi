@@ -5,6 +5,7 @@
 
 #include "Universe.h"
 #include "SphericalObject.h"
+#include "UtilGlDraw.h"
 
 using namespace std;
 
@@ -101,7 +102,8 @@ void setProjectionData() {
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity(); // ustaw macierz rzutowania jako jednostkową
-  glOrtho(-currentViewBorder, currentViewBorder, -currentViewBorder, currentViewBorder, -0.5, 0.5);
+  glOrtho(-currentViewBorder, currentViewBorder, -currentViewBorder, currentViewBorder,
+          -0.5, 0.5);
 }
 
 void paint() {
@@ -110,6 +112,9 @@ void paint() {
   glClearColor(1, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   glLineWidth(lineWidthPix);
+
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity();
 
   glBegin(GL_LINES);
   glColor3f(1.0, 0.0, 0.0);
@@ -164,17 +169,7 @@ void paintPhysicalObjects() {
     const Vector & pos = po->_position;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const double radius = static_cast<const SphericalObject &>(*po)._radius;
-      const double radiusSin = sin(M_PI_4) * radius;
-      glBegin(GL_LINES);
-      glVertex3f(pos.v[0] - radiusSin, pos.v[1] + radiusSin, 0);
-      glVertex3f(pos.v[0] + radiusSin, pos.v[1] - radiusSin, 0);
-      glVertex3f(pos.v[0] + radiusSin, pos.v[1] + radiusSin, 0);
-      glVertex3f(pos.v[0] - radiusSin, pos.v[1] - radiusSin, 0);
-      glVertex3f(pos.v[0] + radius, pos.v[1], 0);
-      glVertex3f(pos.v[0] - radius, pos.v[1], 0);
-      glVertex3f(pos.v[0], pos.v[1] + radius, 0);
-      glVertex3f(pos.v[0], pos.v[1] - radius, 0);
-      glEnd();
+      drawFilledCircle(pos.v[0], pos.v[1], radius, 30);
     }
     else {
       glBegin(GL_LINES);
