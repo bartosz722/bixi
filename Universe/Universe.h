@@ -15,6 +15,13 @@
 
 class Universe {
 public:
+  struct Settings {
+    Settings();
+    double _timeUnit; // s; tick time unit
+    bool _detectCollision;
+    double _collisionTolerance; // factor (0--1.0]
+  };
+
   struct Snapshot {
     Snapshot();
     bool _running;
@@ -27,8 +34,8 @@ public:
   Universe();
   ~Universe();
 
-  bool loadSettings();
-  bool loadPhysicalObjects();
+  void setSettings(const Settings & s);
+  void insertPhysicalObject(const PhysicalObject & po);
   bool start();
   void stop(); // can not be started after is stopped
 
@@ -36,7 +43,6 @@ public:
   void getSnapshot(Snapshot & s); // may be always called
 
 private:
-  void resetSettings();
   void resetRuntimeData();
 
   void spacetime(); // main loop is executed here
@@ -45,9 +51,7 @@ private:
   bool objectsCollided(const PhysicalObject & obj1, const PhysicalObject & obj2);
 
   // settings:
-  double _timeUnit; // s; tick time unit
-  bool _detectCollision;
-  double _collisionTolerance; // factor (0--1.0]
+  Settings _sett;
 
   // runtime data:
   bool _running;

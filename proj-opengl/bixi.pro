@@ -17,6 +17,7 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../PhysicalObjects/SphericalObject.h \
            ../Universe/PhysicalObjectsContainer.h \
            ../Universe/Universe.h \
+           ../Universe/DataLoader.h \
            ../Utilities/Assert.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
@@ -27,6 +28,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../PhysicalObjects/SphericalObject.cpp \
            ../Universe/PhysicalObjectsContainer.cpp \
            ../Universe/Universe.cpp \
+           ../Universe/DataLoader.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp \
            ../ProjOpenGl/main.cpp \

@@ -6,6 +6,7 @@
 #include "Universe.h"
 #include "SphericalObject.h"
 #include "UtilGlDraw.h"
+#include "DataLoader.h"
 
 using namespace std;
 
@@ -59,11 +60,11 @@ void printPhysicalObjects(const PhysicalObjectsContainer & poc) {
 }
 
 void setupUniverse() {
-  if(!universe.loadSettings()) {
+  if(!loadSettings(universe)) {
     cout << "Failed to load settings\n";
     exit(1);
   }
-  if(!universe.loadPhysicalObjects()) {
+  if(!loadPhysicalObjects(universe)) {
     cout << "Failed to load physical objects\n";
     exit(1);
   }
@@ -153,8 +154,11 @@ void readUniverse(int) {
     doPaintPhysicalObejcts = false;
   }
 
-//  cout << "current tick: " << snapshot._currentTick << endl;
-//  printPhysicalObjects(snapshot._objects);
+  cout << "current tick: " << snapshot._currentTick << endl;
+  printPhysicalObjects(snapshot._objects);
+  if(snapshot._currentTick >= 10000) {
+    doPaintPhysicalObejcts = false;
+  }
 
 //  glutPostRedisplay();
   paint();

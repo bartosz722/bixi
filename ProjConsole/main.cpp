@@ -2,6 +2,7 @@
 #include <thread>
 
 #include "Universe.h"
+#include "DataLoader.h"
 
 using namespace std;
 
@@ -17,11 +18,11 @@ int main() {
   Universe universe;
   Universe::Snapshot snapshot;
 
-  if(!universe.loadSettings()) {
+  if(!loadSettings(universe)) {
     cout << "Failed to load settings\n";
     exit(1);
   }
-  if(!universe.loadPhysicalObjects()) {
+  if(!loadPhysicalObjects(universe)) {
     cout << "Failed to load physical objects\n";
     exit(1);
   }
