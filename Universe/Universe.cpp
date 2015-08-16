@@ -7,6 +7,7 @@ using namespace std;
 
 Universe::Settings::Settings()
   : _timeUnit(1.0), _detectCollision(false), _collisionTolerance(0.00001)
+  , _roundPerSecond(50), _ticksPerRound(10)
 {}
 
 Universe::Snapshot::Snapshot()
@@ -15,6 +16,8 @@ Universe::Snapshot::Snapshot()
 
 Universe::Universe() {
   resetRuntimeData();
+  _roundBegin = ClockT::now();
+  _roundDuration = DurationT::zero();
 }
 
 Universe::~Universe() {
@@ -30,6 +33,19 @@ void Universe::resetRuntimeData() {
 
 void Universe::setSettings(const Settings & s) {
   _sett = s;
+
+  if(_sett._roundPerSecond == 0) {
+    _roundDuration = DurationT::zero();
+  }
+  else {
+    _roundDuration = DurationT(chrono::seconds(1)) / _sett._roundPerSecond;
+  }
+  cout << "_roundDuration: " << _roundDuration.count() << endl;
+
+  if(_sett._ticksPerRound == 0) {
+    _sett._ticksPerRound = 1000000; // some big value
+  }
+  cout << "_ticksPerRound: " << _sett._ticksPerRound << endl;
 }
 
 void Universe::insertPhysicalObject(const PhysicalObject & po) {
@@ -56,7 +72,9 @@ void Universe::waitForFinish() {
 
 void Universe::spacetime() {
   while(true) {
-    {
+    _roundBegin = ClockT::now();
+
+    for(std::size_t t=0; t<_sett._ticksPerRound; ++t) {
       lock_guard<mutex> locker(_mutexData);
       if(_stopRequested) {
         break;
@@ -64,7 +82,11 @@ void Universe::spacetime() {
       tick();
     }
 
-    this_thread::sleep_for(chrono::milliseconds(10));
+    auto elapsedTime = ClockT::now() - _roundBegin;
+    auto timeToSleep = _roundDuration - elapsedTime;
+    if(timeToSleep > timeToSleep.zero()) {
+      this_thread::sleep_for(timeToSleep);
+    }
   }
 }
 

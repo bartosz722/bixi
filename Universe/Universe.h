@@ -10,8 +10,13 @@
 
 #include <mutex>
 #include <thread>
+#include <chrono>
 #include "BasicDefinitions.h"
 #include "PhysicalObjectsContainer.h"
+
+// Marks:
+// TS - method is thread-safe and may be called only after start() was called.
+// AC - method is thread-safe and may always called
 
 class Universe {
 public:
@@ -20,6 +25,8 @@ public:
     double _timeUnit; // s; tick time unit
     bool _detectCollision;
     double _collisionTolerance; // factor (0--1.0]
+    std::size_t _roundPerSecond; // set to 0 for no limitation
+    std::size_t _ticksPerRound; // set to 0 for no limitation
   };
 
   struct Snapshot {
@@ -37,12 +44,15 @@ public:
   void setSettings(const Settings & s);
   void insertPhysicalObject(const PhysicalObject & po);
   bool start();
-  void stop(); // can not be started after is stopped
+  void stop(); // TS; can not be started after is stopped
 
-  void waitForFinish();
-  void getSnapshot(Snapshot & s); // may be always called
+  void waitForFinish(); // TS
+  void getSnapshot(Snapshot & s); // AC; may be called before start()
 
 private:
+  typedef std::chrono::steady_clock ClockT;
+  typedef ClockT::duration DurationT;
+
   void resetRuntimeData();
 
   void spacetime(); // main loop is executed here
@@ -68,6 +78,9 @@ private:
   std::thread _thread;
   // Guards runtime and physical objects data while _thread is running.
   std::mutex _mutexData;
+
+  ClockT::time_point _roundBegin;
+  DurationT _roundDuration; // if zero then no sleep between rounds
 };
 
 #endif /* UNIVERSE_H_ */

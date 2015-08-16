@@ -69,8 +69,8 @@ void setupUniverse() {
     exit(1);
   }
 
-  cout << "Initial state of objects:\n";
   universe.getSnapshot(snapshot);
+  cout << "Initial state of objects:\nCount: " << snapshot._objects.size() << endl;
   printPhysicalObjects(snapshot._objects);
 }
 
@@ -154,11 +154,11 @@ void readUniverse(int) {
     doPaintPhysicalObejcts = false;
   }
 
-  cout << "current tick: " << snapshot._currentTick << endl;
-  printPhysicalObjects(snapshot._objects);
-  if(snapshot._currentTick >= 10000) {
-    doPaintPhysicalObejcts = false;
-  }
+//  cout << "current tick: " << snapshot._currentTick << endl;
+//  printPhysicalObjects(snapshot._objects);
+//  if(snapshot._currentTick >= 10000) {
+//    doPaintPhysicalObejcts = false;
+//  }
 
 //  glutPostRedisplay();
   paint();

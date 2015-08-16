@@ -7,17 +7,22 @@ using namespace std;
 
 bool loadSettings(Universe & u) {
   Universe::Settings s;
+
   s._timeUnit = 1.0;
   s._detectCollision = true;
   s._collisionTolerance = 0.00001;
+  s._roundPerSecond = 50;
+  s._ticksPerRound = 20;
+
   u.setSettings(s);
   return true;
 }
 
 bool loadPhysicalObjects(Universe & u) {
+  int physObjSet = 1;
   int id = 1;
 
-  {
+  if(physObjSet == 1) {
     SphericalObject earth;
     earth.setId(id++);
     earth._mass = 5.972 * pow(10, 24);
@@ -49,39 +54,34 @@ bool loadPhysicalObjects(Universe & u) {
     u.insertPhysicalObject(iss);
   //  u.insertPhysicalObject(someRock);
   }
+  else if(physObjSet == 2) {
+    //G=8;
 
-//  {
-//    //G=8;
-//
-//    SphericalObject sun;
-//    sun.setId(id++);
-//    sun._mass = 1000000;
-//    sun._position = Vector(0, 0, 0);
-//    sun._velocity = Vector(0, -2.5, 0);
-//    sun._radius = 1.8;
-//
-//    SphericalObject earth;
-//    earth.setId(id++);
-//    earth._mass = 12500;
-//    earth._position = Vector(210, 0, 0);
-//    earth._velocity = Vector(0, 195, 0);
-//    earth._radius = 0.8;
-//
-//    SphericalObject moon;
-//    moon.setId(id++);
-//    moon._mass = 1;
-//    moon._position = Vector(220, 0, 0);
-//    moon._velocity = Vector(0, 295, 0);
-//    moon._radius = 0.5;
-//
-//    u.insertPhysicalObject(sun);
-//    u.insertPhysicalObject(earth);
-//    u.insertPhysicalObject(moon);
-//  }
+    SphericalObject sun;
+    sun.setId(id++);
+    sun._mass = 1000000;
+    sun._position = Vector(0, 0, 0);
+    sun._velocity = Vector(0, -2.5, 0);
+    sun._radius = 1.8;
 
-  Universe::Snapshot us;
-  u.getSnapshot(us);
-  cout << "objects loaded, count: " << us._objects.size() << endl;
+    SphericalObject earth;
+    earth.setId(id++);
+    earth._mass = 12500;
+    earth._position = Vector(210, 0, 0);
+    earth._velocity = Vector(0, 195, 0);
+    earth._radius = 0.8;
+
+    SphericalObject moon;
+    moon.setId(id++);
+    moon._mass = 1;
+    moon._position = Vector(220, 0, 0);
+    moon._velocity = Vector(0, 295, 0);
+    moon._radius = 0.5;
+
+    u.insertPhysicalObject(sun);
+    u.insertPhysicalObject(earth);
+    u.insertPhysicalObject(moon);
+  }
 
   return true;
 }
