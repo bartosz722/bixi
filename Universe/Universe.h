@@ -25,7 +25,7 @@ public:
     double _timeUnit; // s; tick time unit
     bool _detectCollision;
     double _collisionTolerance; // factor (0--1.0]
-    std::size_t _roundPerSecond; // set to 0 for no limitation
+    std::size_t _roundsPerSecond; // set to 0 for no limitation
     std::size_t _ticksPerRound; // set to 0 for no limitation
   };
 

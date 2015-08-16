@@ -7,7 +7,7 @@ using namespace std;
 
 Universe::Settings::Settings()
   : _timeUnit(1.0), _detectCollision(false), _collisionTolerance(0.00001)
-  , _roundPerSecond(50), _ticksPerRound(10)
+  , _roundsPerSecond(50), _ticksPerRound(10)
 {}
 
 Universe::Snapshot::Snapshot()
@@ -34,13 +34,16 @@ void Universe::resetRuntimeData() {
 void Universe::setSettings(const Settings & s) {
   _sett = s;
 
-  if(_sett._roundPerSecond == 0) {
+  if(_sett._roundsPerSecond == 0) {
     _roundDuration = DurationT::zero();
   }
   else {
-    _roundDuration = DurationT(chrono::seconds(1)) / _sett._roundPerSecond;
+    _roundDuration = DurationT(chrono::seconds(1)) / _sett._roundsPerSecond;
   }
-  cout << "_roundDuration: " << _roundDuration.count() << endl;
+
+  cout << "_roundsPerSecond: " << _sett._roundsPerSecond << ", _roundDuration: "
+      << chrono::duration_cast<chrono::duration<double, ratio<1, 1000>>>(_roundDuration).count()
+      << " ms" << endl;
 
   if(_sett._ticksPerRound == 0) {
     _sett._ticksPerRound = 1000000; // some big value

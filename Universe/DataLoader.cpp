@@ -11,7 +11,7 @@ bool loadSettings(Universe & u) {
   s._timeUnit = 1.0;
   s._detectCollision = true;
   s._collisionTolerance = 0.00001;
-  s._roundPerSecond = 50;
+  s._roundsPerSecond = 50;
   s._ticksPerRound = 20;
 
   u.setSettings(s);
@@ -50,9 +50,9 @@ bool loadPhysicalObjects(Universe & u) {
     someRock._radius = earth._radius;
 
     u.insertPhysicalObject(earth);
-  //  u.insertPhysicalObject(man1));
+//    u.insertPhysicalObject(man1);
     u.insertPhysicalObject(iss);
-  //  u.insertPhysicalObject(someRock);
+//    u.insertPhysicalObject(someRock);
   }
   else if(physObjSet == 2) {
     //G=8;
