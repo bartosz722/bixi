@@ -17,6 +17,7 @@ void paint();
 void paintPhysicalObjects();
 void reshape(int x, int y);
 void readUniverse(int value);
+const GLfloat * getColorForPhysicalObject(int index);
 
 Universe universe;
 Universe::Snapshot snapshot;
@@ -31,6 +32,13 @@ const int lineWidthPix = 3;
 const double viewBorderMargin = 0.03; // % of extreme coordinate
 
 double currentViewBorder = initialViewBorder;
+
+const GLfloat physObjColor[][3] = {
+  { 0, 0, 1 }, // blue
+  { 0.788f, 0, 0.804f }, // violet
+  { 0.098f, 0.631f, 0 }, // green
+  { 1, 0, 0 }, // red
+};
 
 int main(int argc, char **argv) {
   cout << "bixi OpenGL" << endl;
@@ -96,9 +104,9 @@ void setProjectionData() {
     }
   }
 
-  currentViewBorder = physicalObjectExtremum * (1.0 + viewBorderMargin);
-  if(currentViewBorder < initialViewBorder) {
-    currentViewBorder = initialViewBorder;
+  double newViewBorder = physicalObjectExtremum * (1.0 + viewBorderMargin);
+  if(newViewBorder > currentViewBorder) {
+    currentViewBorder = newViewBorder;
   }
 
   glMatrixMode(GL_PROJECTION);
@@ -165,11 +173,12 @@ void readUniverse(int) {
 }
 
 void paintPhysicalObjects() {
-  glColor3f(0.0, 0.0, 1.0);
-
   const double physObjDrawSize = currentViewBorder * physicalObjectSize;
 
+  int i = 0;
   for(const auto & po : snapshot._objects) {
+    glColor3fv(getColorForPhysicalObject(i));
+
     const Vector & pos = po->_position;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const double radius = static_cast<const SphericalObject &>(*po)._radius;
@@ -183,5 +192,12 @@ void paintPhysicalObjects() {
       glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] - physObjDrawSize, 0);
       glEnd();
     }
+
+    ++i;
   }
+}
+
+const GLfloat * getColorForPhysicalObject(int index) {
+  int i = index % (sizeof(physObjColor) / sizeof(physObjColor[0]));
+  return physObjColor[i];
 }
