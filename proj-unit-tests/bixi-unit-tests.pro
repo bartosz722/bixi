@@ -16,7 +16,7 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../PhysicalObjects/SphericalObject.h \
            ../UnitTests/unit_tests_tools.h \
            ../Universe/PhysicalObjectsContainer.h \
-           ../Universe/Universe.h \
+           ../Universe/Tracker.h \
            ../Utilities/Assert.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
@@ -29,8 +29,9 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../UnitTests/test_PhysicalObjectsContainer.cpp \
            ../UnitTests/test_SphericalObject.cpp \
            ../UnitTests/test_Vector.cpp \
+           ../UnitTests/test_Tracker.cpp \
            ../UnitTests/unit_tests_tools.cpp \
            ../Universe/PhysicalObjectsContainer.cpp \
-           #../Universe/Universe.cpp \
+           ../Universe/Tracker.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp
