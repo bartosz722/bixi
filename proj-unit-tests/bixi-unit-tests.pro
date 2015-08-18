@@ -20,7 +20,8 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Utilities/Assert.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
-           ../Utilities/Vector.h
+           ../Utilities/Vector.h \
+           ../Utilities/CyclicBuffer.h 
 SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../PhysicalObjects/Spacecraft.cpp \
            ../PhysicalObjects/SphericalObject.cpp \
@@ -30,6 +31,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../UnitTests/test_SphericalObject.cpp \
            ../UnitTests/test_Vector.cpp \
            ../UnitTests/test_Tracker.cpp \
+           ../UnitTests/test_CyclicBuffer.cpp \
            ../UnitTests/unit_tests_tools.cpp \
            ../Universe/PhysicalObjectsContainer.cpp \
            ../Universe/Tracker.cpp \
