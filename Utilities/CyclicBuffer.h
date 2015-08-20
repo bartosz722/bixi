@@ -9,6 +9,7 @@
 #define UTILITIES_CYCLICBUFFER_H_
 
 #include <cstddef>
+#include <utility>
 
 template <class T> class CyclicBuffer;
 
@@ -53,17 +54,43 @@ class CyclicBuffer {
 public:
   typedef CyclicBufferIterator<T> ConstIterator;
 
+  CyclicBuffer()
+    : _capacity(0)
+    , _first(0)
+    , _afterLast(0)
+    , _isFull(true)
+  {
+    _data = NULL;
+  }
+
   CyclicBuffer(std::size_t capacity)
     : _capacity(capacity)
     , _first(0)
     , _afterLast(0)
-    , _isFull(false)
   {
-    _data = new T [_capacity];
+    if(_capacity > 0) {
+      _isFull = false;
+      _data = new T [_capacity];
+    }
+    else {
+      _isFull = true;
+      _data = NULL;
+    }
+  }
+
+  CyclicBuffer(CyclicBuffer && other)
+    : CyclicBuffer()
+  {
+    moveFrom(std::move(other));
   }
 
   ~CyclicBuffer() {
     delete [] _data;
+  }
+
+  CyclicBuffer & operator=(CyclicBuffer && other) {
+    moveFrom(std::move(other));
+    return *this;
   }
 
   void push_back(const T & elem) {
@@ -94,7 +121,7 @@ public:
 
   bool isFull() const { return _isFull; }
 
-  bool isEmpty() const { return !_isFull && _first == _afterLast; }
+  bool isEmpty() const { return (!_isFull && _first == _afterLast) || (_data == NULL); }
 
   ConstIterator begin() const {
     return ConstIterator(*this, isEmpty(), _first);
@@ -105,14 +132,21 @@ public:
   }
 
 private:
-  const std::size_t _capacity;
+  void moveFrom(CyclicBuffer && other) {
+    std::swap(_capacity, other._capacity);
+    std::swap(_data, other._data);
+    std::swap(_first, other._first);
+    std::swap(_afterLast, other._afterLast);
+    std::swap(_isFull, other._isFull);
+  }
+
+  std::size_t _capacity;
   T * _data;
   std::size_t _first;
   std::size_t _afterLast;
   bool _isFull;
 
-  template<class U>
-  friend class CyclicBufferIterator;
+  friend class CyclicBufferIterator<T>;
 };
 
 #endif /* UTILITIES_CYCLICBUFFER_H_ */

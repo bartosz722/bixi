@@ -44,6 +44,10 @@ TEST(Tracker, PushAndGetData_Density) {
   }
 }
 
+TEST(Tracker, PushAndGetDataMoreTimesThanCapacity) {
+  // Not needed, tests in CyclicBuffer do these checks.
+}
+
 TEST(Tracker, Capacity) {
   const int density = 3;
   const int capacity = 20;
@@ -60,6 +64,11 @@ TEST(Tracker, Capacity) {
     t.pushData(poc);
     auto track = t.getTrack(1);
     CHECK(track != nullptr);
-    CHECK(track->size() <= capacity);
+    if(i < (capacity-1)*density) {
+      CHECK(track->size() < capacity);
+    }
+    else {
+      CHECK(track->size() == capacity);
+    }
   }
 }

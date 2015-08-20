@@ -2,13 +2,13 @@
 #define TRACKER_H_
 
 #include <map>
-#include <deque>
 #include "PhysicalObjectsContainer.h"
 #include "Vector.h"
+#include "CyclicBuffer.h"
 
 class Tracker {
 public:
-  typedef std::deque<Vector> Track;
+  typedef CyclicBuffer<Vector> Track;
 
   // Takes data from 1 in 'density' pushData() calls.
   // 'capacity' - max elements in one track
@@ -18,8 +18,6 @@ public:
   const Track * getTrack(int id) const;
 
 private:
-  static const int _oldToRemoveDivisor = 10;
-
   const std::size_t _density;
   const std::size_t _capacity;
   std::size_t _pushDataCount;
