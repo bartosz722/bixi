@@ -1,27 +1,6 @@
-#include <iostream>
-#include <thread>
-#include <cmath>
-#include <GL/glut.h>
-
-#include "Universe.h"
-#include "SphericalObject.h"
-#include "UtilGlDraw.h"
-#include "DataLoader.h"
+#include "main.h"
 
 using namespace std;
-
-void printPhysicalObjects(const PhysicalObjectsContainer & poc);
-void setupUniverse();
-void setupOpenGL(int & argc, char **argv);
-void paint();
-void paintPhysicalObjects();
-void reshape(int x, int y);
-void readUniverse(int value);
-const GLfloat * getColorForPhysicalObject(int index);
-
-Universe universe;
-Universe::Snapshot snapshot;
-bool doPaintPhysicalObejcts = true;
 
 const int windowWidth = 800;
 const int windowHeight = 800;
@@ -31,14 +10,18 @@ const double physicalObjectSize = 0.03; // % of wiew width
 const int lineWidthPix = 3;
 const double viewBorderMargin = 0.03; // % of extreme coordinate
 
-double currentViewBorder = initialViewBorder;
-
 const GLfloat physObjColor[][3] = {
   { 0, 0, 1 }, // blue
   { 0.788f, 0, 0.804f }, // violet
   { 0.098f, 0.631f, 0 }, // green
   { 1, 0, 0 }, // red
 };
+
+Universe universe;
+Universe::Snapshot snapshot;
+
+bool doPaintPhysicalObejcts = true;
+double currentViewBorder = initialViewBorder;
 
 int main(int argc, char **argv) {
   cout << "bixi OpenGL" << endl;

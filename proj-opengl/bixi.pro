@@ -22,7 +22,8 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
            ../Utilities/Vector.h \
-           ../UtilitiesGl/UtilGlDraw.h
+           ../UtilitiesGl/UtilGlDraw.h \
+           ../ProjOpenGl/main.h
 SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../PhysicalObjects/Spacecraft.cpp \
            ../PhysicalObjects/SphericalObject.cpp \
