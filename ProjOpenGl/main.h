@@ -18,6 +18,7 @@ void setupUniverse();
 void setupOpenGL(int & argc, char **argv);
 void paint();
 void paintPhysicalObjects();
+void paintTracks();
 void reshape(int x, int y);
 void readUniverse(int value);
 const GLfloat * getColorForPhysicalObject(int index);

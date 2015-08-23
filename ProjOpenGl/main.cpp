@@ -8,7 +8,10 @@ const int repaintPeriodMs = 20;
 const double initialViewBorder = 31850000;
 const double physicalObjectSize = 0.03; // % of wiew width
 const int lineWidthPix = 3;
+const int lineWidthTrack = 1;
 const double viewBorderMargin = 0.03; // % of extreme coordinate
+const size_t trackLength = 1000;
+const size_t trackDensity = 5;
 
 const GLfloat physObjColor[][3] = {
   { 0, 0, 1 }, // blue
@@ -19,6 +22,7 @@ const GLfloat physObjColor[][3] = {
 
 Universe universe;
 Universe::Snapshot snapshot;
+Tracker tracker(trackDensity, trackLength);
 
 bool doPaintPhysicalObejcts = true;
 double currentViewBorder = initialViewBorder;
@@ -58,6 +62,12 @@ void setupUniverse() {
   if(!loadPhysicalObjects(universe)) {
     cout << "Failed to load physical objects\n";
     exit(1);
+  }
+
+  {
+    // TODO: move setting this to DataLoader
+    tracker.trackObject(1);
+    tracker.trackObject(4);
   }
 
   universe.getSnapshot(snapshot);
@@ -103,13 +113,13 @@ void paint() {
 
   glClearColor(1, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT);
-  glLineWidth(lineWidthPix);
 
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
 
-  glBegin(GL_LINES);
   glColor3f(1.0, 0.0, 0.0);
+  glLineWidth(lineWidthPix);
+  glBegin(GL_LINES);
   glVertex3f(-initialViewBorder, -initialViewBorder, 0);
   glVertex3f(initialViewBorder, -initialViewBorder, 0);
   glVertex3f(initialViewBorder, -initialViewBorder, 0);
@@ -121,6 +131,7 @@ void paint() {
   glEnd();
 
   paintPhysicalObjects();
+  paintTracks();
 
   glFlush();
   glutSwapBuffers();
@@ -145,6 +156,8 @@ void readUniverse(int) {
     doPaintPhysicalObejcts = false;
   }
 
+  tracker.pushData(snapshot._objects);
+
 //  cout << "current tick: " << snapshot._currentTick << endl;
 //  printPhysicalObjects(snapshot._objects);
 //  if(snapshot._currentTick >= 10000) {
@@ -168,6 +181,7 @@ void paintPhysicalObjects() {
       drawFilledCircle(pos.v[0], pos.v[1], radius, 30);
     }
     else {
+      glLineWidth(lineWidthPix);
       glBegin(GL_LINES);
       glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] + physObjDrawSize, 0);
       glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] - physObjDrawSize, 0);
@@ -183,4 +197,27 @@ void paintPhysicalObjects() {
 const GLfloat * getColorForPhysicalObject(int index) {
   int i = index % (sizeof(physObjColor) / sizeof(physObjColor[0]));
   return physObjColor[i];
+}
+
+void paintTracks() {
+  static int ti=0;
+  ++ti;
+
+  const auto & tracks = tracker.getTracks();
+  int i = 0;
+  for(const auto & t : tracks) {
+    if(ti % 100 == 0) {
+      cout << "track of " << t.first << " size " << t.second.size() << endl;
+    }
+
+    glColor3fv(getColorForPhysicalObject(i++));
+    glLineWidth(lineWidthTrack);
+    glBegin(GL_LINE_STRIP);
+
+    for(const auto & point : t.second) {
+      glVertex3d(point.v[0], point.v[1], point.v[2]);
+    }
+
+    glEnd();
+  }
 }

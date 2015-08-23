@@ -9,19 +9,20 @@
 class Tracker {
 public:
   typedef CyclicBuffer<Vector> Track;
+  typedef std::map<int, Track> TrackContainer;
 
   // Takes data from 1 in 'density' pushData() calls.
   // 'capacity' - max elements in one track
   Tracker(std::size_t density, std::size_t capacity);
   void trackObject(int id);
   void pushData(const PhysicalObjectsContainer & poc);
-  const Track * getTrack(int id) const;
+  const TrackContainer & getTracks() const { return _tracks; }
 
 private:
   const std::size_t _density;
   const std::size_t _capacity;
   std::size_t _pushDataCount;
-  std::map<int, Track> _tracks;
+  TrackContainer _tracks;
 };
 
 #endif

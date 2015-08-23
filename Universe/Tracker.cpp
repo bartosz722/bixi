@@ -25,10 +25,3 @@ void Tracker::pushData(const PhysicalObjectsContainer& poc) {
   }
 }
 
-const Tracker::Track * Tracker::getTrack(int id) const {
-  auto fi = _tracks.find(id);
-  if(fi == _tracks.end()) {
-    return nullptr;
-  }
-  return &(fi->second);
-}

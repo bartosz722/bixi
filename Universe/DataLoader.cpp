@@ -27,7 +27,7 @@ bool loadPhysicalObjects(Universe & u) {
     earth.setId(id++);
     earth._mass = 5.972 * pow(10, 24);
     earth._position = Vector(0, 0, 0);
-    earth._velocity = Vector(0, 0, 0);
+    earth._velocity = Vector(0, -3000, 0);
     earth._radius = 6370*1000;
 
     PhysicalObject man1;
@@ -51,8 +51,8 @@ bool loadPhysicalObjects(Universe & u) {
 
     u.insertPhysicalObject(earth);
 //    u.insertPhysicalObject(man1);
-    u.insertPhysicalObject(iss);
-//    u.insertPhysicalObject(someRock);
+//    u.insertPhysicalObject(iss);
+    u.insertPhysicalObject(someRock);
   }
   else if(physObjSet == 2) {
     //G=8;

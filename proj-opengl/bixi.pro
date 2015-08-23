@@ -18,10 +18,12 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Universe/PhysicalObjectsContainer.h \
            ../Universe/Universe.h \
            ../Universe/DataLoader.h \
+           ../Universe/Tracker.h \
            ../Utilities/Assert.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
            ../Utilities/Vector.h \
+           ../Utilities/CyclicBuffer.h \
            ../UtilitiesGl/UtilGlDraw.h \
            ../ProjOpenGl/main.h
 SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
@@ -30,6 +32,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../Universe/PhysicalObjectsContainer.cpp \
            ../Universe/Universe.cpp \
            ../Universe/DataLoader.cpp \
+           ../Universe/Tracker.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp \
            ../ProjOpenGl/main.cpp \
