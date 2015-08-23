@@ -63,7 +63,7 @@ private:
   // settings:
   Settings _sett;
 
-  // runtime data:
+  // synchronized runtime data:
   bool _running;
   bool _stopRequested;
   TickT _currentTick; // always counted from 0
@@ -71,16 +71,20 @@ private:
   // DateTimeT _beginning
   bool _collisionDetected;
 
-  // physical objects data:
+  // not synchronized runtime data:
+  ClockT::time_point _roundBegin;
+  DurationT _roundDuration; // if zero then no sleep between rounds
+
+  // synchronized physical objects data:
   PhysicalObjectsContainer _objects;
+
+  // not synchronized physical objects data:
 
   // Thread executed after start() has finished.
   std::thread _thread;
-  // Guards runtime and physical objects data while _thread is running.
+  // Guards synchronized runtime data and synchronized physical objects data
+  // while _thread is running.
   std::mutex _mutexData;
-
-  ClockT::time_point _roundBegin;
-  DurationT _roundDuration; // if zero then no sleep between rounds
 };
 
 #endif /* UNIVERSE_H_ */
