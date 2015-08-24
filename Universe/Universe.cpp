@@ -15,12 +15,17 @@ Universe::Snapshot::Snapshot()
 {}
 
 Universe::Universe() {
+  resetSettings();
   resetRuntimeData();
-  _roundBegin = ClockT::now();
-  _roundDuration = DurationT::zero();
+  _nextPhysicalObjectId = 0;
 }
 
 Universe::~Universe() {
+}
+
+void Universe::resetSettings() {
+  _sett = Settings();
+  _roundDuration = DurationT::zero();
 }
 
 void Universe::resetRuntimeData() {
@@ -29,6 +34,8 @@ void Universe::resetRuntimeData() {
   _currentTick = 0;
   _elapsedTime = 0.0;
   _collisionDetected = false;
+
+  _roundBegin = ClockT::now();
 }
 
 void Universe::setSettings(const Settings & s) {
@@ -51,9 +58,14 @@ void Universe::setSettings(const Settings & s) {
   cout << "_ticksPerRound: " << _sett._ticksPerRound << endl;
 }
 
-void Universe::insertPhysicalObject(const PhysicalObject & po) {
+void Universe
+::insertPhysicalObject(const PhysicalObject & po, const PhysicalObjectProperties & prop) {
   ASSERT(po._mass != 0.0);
+  int id = _nextPhysicalObjectId++;
   _objects.insert(po);
+  _objects.back()->setId(id);
+  _properties.push_back(prop);
+  _properties.back().setId(id);
 }
 
 bool Universe::start() {

@@ -5,7 +5,7 @@
 PhysicalObject::PhysicalObject()
   : _mass(0.0)
   , _type(PhysicalObjectType::PhysicalObject)
-  , _id(0)
+  , _id(_invalidId)
 {
 }
 
@@ -54,4 +54,9 @@ void PhysicalObject::moveToNextState(double deltaTime) {
 
 void PhysicalObject::clearNextStateVariables() {
   _force.clear();
+}
+
+void PhysicalObject::setId(int id) {
+  ASSERT(_id == _invalidId);
+  _id = id;
 }

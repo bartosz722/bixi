@@ -17,7 +17,7 @@ public:
 
   PhysicalObjectType getType() const { return _type; }
   int getId() const { return _id; }
-  void setId(int id) { _id = id; }
+  void setId(int id);
 
   // Attraction of this object by other object
   Vector getGravityForce(const PhysicalObject & other) const;
@@ -26,6 +26,8 @@ public:
 
   virtual void moveToNextState(double deltaTime);
   virtual void clearNextStateVariables();
+
+  static const int _invalidId = -1;
 
   // State:
   double _mass; // kg

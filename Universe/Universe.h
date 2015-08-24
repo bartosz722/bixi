@@ -13,6 +13,7 @@
 #include <chrono>
 #include "BasicDefinitions.h"
 #include "PhysicalObjectsContainer.h"
+#include "PhysicalObjectProperties.h"
 
 // Marks:
 // TS - method is thread-safe and may be called only after start() was called.
@@ -38,11 +39,14 @@ public:
     PhysicalObjectsContainer _objects;
   };
 
+  typedef std::vector<PhysicalObjectProperties> PropertiesT;
+
   Universe();
   ~Universe();
 
   void setSettings(const Settings & s);
-  void insertPhysicalObject(const PhysicalObject & po);
+  void insertPhysicalObject(const PhysicalObject & po, const PhysicalObjectProperties & prop);
+  const PropertiesT & getPhysicalObjectsProperties() const { return _properties; }
   bool start();
   void stop(); // TS; can not be started after is stopped
 
@@ -53,6 +57,7 @@ private:
   typedef std::chrono::steady_clock ClockT;
   typedef ClockT::duration DurationT;
 
+  void resetSettings();
   void resetRuntimeData();
 
   void spacetime(); // main loop is executed here
@@ -62,6 +67,7 @@ private:
 
   // settings:
   Settings _sett;
+  DurationT _roundDuration; // if zero then no sleep between rounds
 
   // synchronized runtime data:
   bool _running;
@@ -73,18 +79,21 @@ private:
 
   // not synchronized runtime data:
   ClockT::time_point _roundBegin;
-  DurationT _roundDuration; // if zero then no sleep between rounds
 
   // synchronized physical objects data:
   PhysicalObjectsContainer _objects;
 
   // not synchronized physical objects data:
+  // read-only after call to start(), consistent with _objects
+  std::vector<PhysicalObjectProperties> _properties;
 
   // Thread executed after start() has finished.
   std::thread _thread;
   // Guards synchronized runtime data and synchronized physical objects data
   // while _thread is running.
   std::mutex _mutexData;
+  // Id that will be assigned to next inserted object.
+  int _nextPhysicalObjectId;
 };
 
 #endif /* UNIVERSE_H_ */

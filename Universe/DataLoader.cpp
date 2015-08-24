@@ -20,67 +20,73 @@ bool loadSettings(Universe & u) {
 
 bool loadPhysicalObjects(Universe & u) {
   int physObjSet = 1;
-  int id = 1;
+
+  PhysicalObjectProperties pop;
 
   if(physObjSet == 1) {
     SphericalObject earth;
-    earth.setId(id++);
     earth._mass = 5.972 * pow(10, 24);
     earth._position = Vector(0, 0, 0);
     earth._velocity = Vector(0, -3000, 0);
     earth._radius = 6370*1000;
+    pop._color = { 77, 100, 20 };
+    pop._tracked = true;
+    u.insertPhysicalObject(earth, pop);
 
     PhysicalObject man1;
-    man1.setId(id++);
     man1._mass = 70;
     man1._position = Vector(earth._radius + 10, 0, 0);
     man1._velocity = Vector(0, 0, 0);
+    pop._color = Color();
+    pop._tracked = true;
+//    u.insertPhysicalObject(man1, pop);
 
     PhysicalObject iss;
-    iss.setId(id++);
     iss._mass = 417289;
     iss._position = Vector(earth._radius + 430*1000, 0, 0);
     iss._velocity = Vector(0, 7706, 0);
+    pop._color = Color();
+    pop._tracked = true;
+//    u.insertPhysicalObject(iss, pop);
 
     SphericalObject someRock;
-    someRock.setId(id++);
     someRock._mass = earth._mass;
     someRock._position = Vector(earth._radius * 3, 0, 0);
     someRock._velocity = Vector(0, 3000, 0);
     someRock._radius = earth._radius;
-
-    u.insertPhysicalObject(earth);
-//    u.insertPhysicalObject(man1);
-//    u.insertPhysicalObject(iss);
-    u.insertPhysicalObject(someRock);
+    pop._color = Color();
+    pop._tracked = true;
+    u.insertPhysicalObject(someRock, pop);
   }
   else if(physObjSet == 2) {
     //G=8;
 
     SphericalObject sun;
-    sun.setId(id++);
     sun._mass = 1000000;
     sun._position = Vector(0, 0, 0);
     sun._velocity = Vector(0, -2.5, 0);
     sun._radius = 1.8;
+    pop._color = Color();
+    pop._tracked = false;
+    u.insertPhysicalObject(sun, pop);
 
     SphericalObject earth;
-    earth.setId(id++);
     earth._mass = 12500;
     earth._position = Vector(210, 0, 0);
     earth._velocity = Vector(0, 195, 0);
     earth._radius = 0.8;
+    pop._color = Color();
+    pop._tracked = false;
+    u.insertPhysicalObject(earth, pop);
 
     SphericalObject moon;
-    moon.setId(id++);
     moon._mass = 1;
     moon._position = Vector(220, 0, 0);
     moon._velocity = Vector(0, 295, 0);
     moon._radius = 0.5;
-
-    u.insertPhysicalObject(sun);
-    u.insertPhysicalObject(earth);
-    u.insertPhysicalObject(moon);
+    pop._color = Color();
+    pop._tracked = false;
+    u.insertPhysicalObject(moon, pop);
   }
 
   return true;

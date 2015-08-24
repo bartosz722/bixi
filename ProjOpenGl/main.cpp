@@ -13,16 +13,21 @@ const double viewBorderMargin = 0.03; // % of extreme coordinate
 const size_t trackLength = 1000;
 const size_t trackDensity = 5;
 
-const GLfloat physObjColor[][3] = {
-  { 0, 0, 1 }, // blue
-  { 0.788f, 0, 0.804f }, // violet
-  { 0.098f, 0.631f, 0 }, // green
-  { 1, 0, 0 }, // red
+const Color defaultColors[] = {
+  { 0, 0, 255 },
+  { 0, 255, 0 },
+  { 255, 0, 0 },
+};
+
+struct PhysObjData {
+  Color _color;
+  Color _trackColor;
 };
 
 Universe universe;
 Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
+map<int, PhysObjData> objData;
 
 bool doPaintPhysicalObejcts = true;
 double currentViewBorder = initialViewBorder;
@@ -64,11 +69,7 @@ void setupUniverse() {
     exit(1);
   }
 
-  {
-    // TODO: move setting this to DataLoader
-    tracker.trackObject(1);
-    tracker.trackObject(4);
-  }
+  setupLocalPhysicalObjectData();
 
   universe.getSnapshot(snapshot);
   cout << "Initial state of objects:\nCount: " << snapshot._objects.size() << endl;
@@ -173,7 +174,7 @@ void paintPhysicalObjects() {
 
   int i = 0;
   for(const auto & po : snapshot._objects) {
-    glColor3fv(getColorForPhysicalObject(i));
+    glColor3ubv(objData[po->getId()]._color.rgbData());
 
     const Vector & pos = po->_position;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
@@ -194,23 +195,17 @@ void paintPhysicalObjects() {
   }
 }
 
-const GLfloat * getColorForPhysicalObject(int index) {
-  int i = index % (sizeof(physObjColor) / sizeof(physObjColor[0]));
-  return physObjColor[i];
-}
-
 void paintTracks() {
   static int ti=0;
   ++ti;
 
   const auto & tracks = tracker.getTracks();
-  int i = 0;
   for(const auto & t : tracks) {
     if(ti % 100 == 0) {
       cout << "track of " << t.first << " size " << t.second.size() << endl;
     }
 
-    glColor3fv(getColorForPhysicalObject(i++));
+    glColor3ubv(objData[t.first]._trackColor.rgbData());
     glLineWidth(lineWidthTrack);
     glBegin(GL_LINE_STRIP);
 
@@ -219,5 +214,23 @@ void paintTracks() {
     }
 
     glEnd();
+  }
+}
+
+void setupLocalPhysicalObjectData() {
+  int defaultColorCount = 0;
+  for(const auto & prop : universe.getPhysicalObjectsProperties()) {
+    const int objId = prop.getId();
+    if(prop._color.isValid()) {
+      objData[objId]._color = prop._color;
+    }
+    else {
+      int idx = defaultColorCount++ % (sizeof(defaultColors) / sizeof(defaultColors[0]));
+      objData[objId]._color = defaultColors[idx];
+    }
+
+    if(prop._tracked) {
+      tracker.trackObject(objId);
+    }
   }
 }

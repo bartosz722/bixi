@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <cmath>
+#include <map>
 #include <GL/glut.h>
 
 #include "Universe.h"
@@ -20,7 +21,7 @@ void paint();
 void paintPhysicalObjects();
 void paintTracks();
 void reshape(int x, int y);
-void readUniverse(int value);
-const GLfloat * getColorForPhysicalObject(int index);
+void readUniverse(int);
+void setupLocalPhysicalObjectData();
 
 #endif /* PROJOPENGL_MAIN_H_ */
