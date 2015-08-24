@@ -5,11 +5,11 @@ using namespace std;
 const int windowWidth = 800;
 const int windowHeight = 800;
 const int repaintPeriodMs = 20;
-const double initialViewBorder = 31850000;
+const int printPhysObjectsPeriod = 50 * 3; // unit: one readUniverse() call
 const double physicalObjectSize = 0.03; // % of wiew width
 const int lineWidthPix = 3;
 const int lineWidthTrack = 1;
-const double viewBorderMargin = 0.03; // % of extreme coordinate
+const double viewBorderMargin = 0.2; // % of extreme coordinate
 const size_t trackLength = 1000;
 const size_t trackDensity = 5;
 
@@ -30,7 +30,9 @@ Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
 
 bool doPaintPhysicalObejcts = true;
-double currentViewBorder = initialViewBorder;
+double firstViewBorder = -1;
+double currentViewBorder = 0.0;
+size_t readUniverseCallCount = 0;
 
 int main(int argc, char **argv) {
   cout << "bixi OpenGL" << endl;
@@ -102,6 +104,9 @@ void setProjectionData() {
   if(newViewBorder > currentViewBorder) {
     currentViewBorder = newViewBorder;
   }
+  if(firstViewBorder < 0.0) {
+    firstViewBorder = currentViewBorder;
+  }
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity(); // ustaw macierz rzutowania jako jednostkową
@@ -121,14 +126,14 @@ void paint() {
   glColor3f(1.0, 0.0, 0.0);
   glLineWidth(lineWidthPix);
   glBegin(GL_LINES);
-  glVertex3f(-initialViewBorder, -initialViewBorder, 0);
-  glVertex3f(initialViewBorder, -initialViewBorder, 0);
-  glVertex3f(initialViewBorder, -initialViewBorder, 0);
-  glVertex3f(initialViewBorder, initialViewBorder, 0);
-  glVertex3f(initialViewBorder, initialViewBorder, 0);
-  glVertex3f(-initialViewBorder, initialViewBorder, 0);
-  glVertex3f(-initialViewBorder, initialViewBorder, 0);
-  glVertex3f(-initialViewBorder, -initialViewBorder, 0);
+  glVertex3f(-firstViewBorder, -firstViewBorder, 0);
+  glVertex3f(firstViewBorder, -firstViewBorder, 0);
+  glVertex3f(firstViewBorder, -firstViewBorder, 0);
+  glVertex3f(firstViewBorder, firstViewBorder, 0);
+  glVertex3f(firstViewBorder, firstViewBorder, 0);
+  glVertex3f(-firstViewBorder, firstViewBorder, 0);
+  glVertex3f(-firstViewBorder, firstViewBorder, 0);
+  glVertex3f(-firstViewBorder, -firstViewBorder, 0);
   glEnd();
 
   paintPhysicalObjects();
@@ -144,6 +149,8 @@ void reshape(int, int) {
 }
 
 void readUniverse(int) {
+  ++readUniverseCallCount;
+
   if(!doPaintPhysicalObejcts) {
     return;
   }
@@ -154,16 +161,22 @@ void readUniverse(int) {
   universe.getSnapshot(snapshot);
   if(snapshot._collisionDetected) {
     cout << "collision!\n";
+    printPhysicalObjects(snapshot._objects);
     doPaintPhysicalObejcts = false;
   }
 
   tracker.pushData(snapshot._objects);
 
-//  cout << "current tick: " << snapshot._currentTick << endl;
-//  printPhysicalObjects(snapshot._objects);
-//  if(snapshot._currentTick >= 10000) {
-//    doPaintPhysicalObejcts = false;
-//  }
+  if(readUniverseCallCount % printPhysObjectsPeriod == 0) {
+    cout << "current tick: " << snapshot._currentTick << endl;
+    printPhysicalObjects(snapshot._objects);
+
+    const auto & tracks = tracker.getTracks();
+    for(const auto & t : tracks) {
+      cout << "track of obj " << t.first << " size " << t.second.size() << endl;
+      break;
+    }
+  }
 
 //  glutPostRedisplay();
   paint();
@@ -196,16 +209,9 @@ void paintPhysicalObjects() {
 }
 
 void paintTracks() {
-  static int ti=0;
-  ++ti;
-
   const auto & tracks = tracker.getTracks();
   for(const auto & t : tracks) {
-    if(ti % 100 == 0) {
-      cout << "track of " << t.first << " size " << t.second.size() << endl;
-    }
-
-    glColor3ubv(objData[t.first]._trackColor.rgbData());
+    glColor3ubv(objData[t.first]._color.rgbData());
     glLineWidth(lineWidthTrack);
     glBegin(GL_LINE_STRIP);
 
