@@ -99,7 +99,9 @@ bool loadPhysicalObjects(Universe & u) {
     u.insertPhysicalObject(someRock, pop);
   }
   else if(physObjSet == 2) {
+    //sunsystem.py
     //G=8;
+    //t=0.01 - original
 
     SphericalObject sun;
     sun._mass = 1000000;
