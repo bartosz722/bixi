@@ -11,7 +11,7 @@ const int lineWidthPix = 3;
 const int lineWidthTrack = 1;
 const double viewBorderMargin = 0.2; // % of extreme coordinate
 const size_t trackLength = 1000;
-const size_t trackDensity = 5;
+const size_t trackDensity = 2;
 
 const Color defaultColors[] = {
   { 0, 0, 255 },
