@@ -8,7 +8,9 @@
 #ifndef BASICDEFINITIONS_H_
 #define BASICDEFINITIONS_H_
 
-typedef long int TickT;
+#include <cstddef>
+
+typedef std::size_t TickT;
 
 template<class EnumType>
 int enumValue(EnumType e) {
