@@ -8,13 +8,19 @@ using namespace std;
 bool loadSettings(Universe & u) {
   Universe::Settings s;
 
+  s._timeUnit = 0.0002;
 //  s._timeUnit = 0.01; // A
 //  s._timeUnit = 0.1; // B
 //  s._timeUnit = 0.001; // C
 //  s._timeUnit = 0.0001; // D
-  s._timeUnit = 0.00001; // E
+//  s._timeUnit = 0.00001; // E
+
   s._detectCollision = true;
   s._collisionTolerance = 0.00001;
+
+
+  s._roundsPerSecond = 50;
+  s._ticksPerRound = 100;
 
   // A2
 //  s._roundsPerSecond = 50;
@@ -45,15 +51,15 @@ bool loadSettings(Universe & u) {
 //  s._ticksPerRound = 1000;
 
   // E3
-  s._roundsPerSecond = 50;
-  s._ticksPerRound = 10000;
+//  s._roundsPerSecond = 50;
+//  s._ticksPerRound = 10000;
 
   u.setSettings(s);
   return true;
 }
 
 bool loadPhysicalObjects(Universe & u) {
-  int physObjSet = 3;
+  int physObjSet = 4;
 
   PhysicalObjectProperties pop;
 
@@ -137,6 +143,30 @@ bool loadPhysicalObjects(Universe & u) {
     earth._position = Vector(100, 0, 0);
     earth._velocity = Vector(0, -10, 0);
     u.insertPhysicalObject(earth, pop);
+  }
+  else if(physObjSet == 4) {
+    //G=1;
+    //dt=0.02 - oryginał, ale orbita krzywa
+    //dt=0.0002 - w miare dobrze widać
+    //optimal view: 50 ticks/s for dt=0.02
+
+    SphericalObject earth;
+    earth._mass = 2.5;
+    earth._position = Vector(-1, 0.20, 0);
+    earth._velocity = Vector(0, 0.2, -0.3);
+    earth._radius = 0.075;
+    pop._color = Color();
+    pop._tracked = true;
+    u.insertPhysicalObject(earth, pop);
+
+    SphericalObject rock;
+    rock._mass = 1;
+    rock._position = Vector(1, 0, 0);
+    rock._velocity = earth._velocity * earth._mass / rock._mass * -1.0;
+    rock._radius = 0.04;
+    pop._color = Color();
+    pop._tracked = true;
+    u.insertPhysicalObject(rock, pop);
   }
 
   return true;
