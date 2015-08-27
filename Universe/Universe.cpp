@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "Universe.h"
 #include "Assert.h"
 #include "SphericalObject.h"
@@ -26,6 +27,8 @@ Universe::~Universe() {
 void Universe::resetSettings() {
   _sett = Settings();
   _roundDuration = DurationT::zero();
+  _precisionTestData = PrecisionTestData();
+  _precisionTestMode = false;
 }
 
 void Universe::resetRuntimeData() {
@@ -34,8 +37,10 @@ void Universe::resetRuntimeData() {
   _currentTick = 0;
   _elapsedTime = 0.0;
   _collisionDetected = false;
+  _precisionTestResult = PrecisionTestResult();
 
   _roundBegin = ClockT::now();
+  _precisionTestObjectLastY = 0.0;
 }
 
 void Universe::setSettings(const Settings & s) {
@@ -92,6 +97,7 @@ void Universe::spacetime() {
     for(std::size_t t=0; t<_sett._ticksPerRound; ++t) {
       lock_guard<mutex> locker(_mutexData);
       if(_stopRequested) {
+        _running = false;
         break;
       }
       tick();
@@ -147,6 +153,10 @@ void Universe::tick() {
 
   ++_currentTick;
   _elapsedTime += _sett._timeUnit;
+
+  if(_precisionTestMode) {
+    precisionTestTick();
+  }
 }
 
 bool Universe::objectsCollided(const PhysicalObject & obj1, const PhysicalObject & obj2) {
@@ -178,3 +188,103 @@ void Universe::getSnapshot(Snapshot & s) {
   s._collisionDetected = _collisionDetected;
   s._objects = _objects;
 }
+
+void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
+  {
+    _precisionTestData = ptd;
+    _precisionTestMode = true;
+  }
+
+  {
+    Settings s;
+    s._timeUnit = _precisionTestData._timeUnit;
+    s._detectCollision = true;
+    s._collisionTolerance = 0.00001;
+    s._roundsPerSecond = _precisionTestData._roundsPerSecond;
+    s._ticksPerRound = _precisionTestData._ticksPerRound;
+    setSettings(s);
+  }
+
+  {
+    SphericalObject planet;
+    PhysicalObjectProperties pop;
+
+    planet._mass = _precisionTestData._mass;
+    planet._position = Vector(_precisionTestData._x, 0, 0);
+    planet._velocity = Vector(0, _precisionTestData._velocityY, 0);
+    planet._radius = _precisionTestData._x / 100;
+    pop._color = Color();
+    pop._tracked = true;
+    insertPhysicalObject(planet, pop);
+
+    planet._position.v[0] *= -1.0;
+    planet._velocity.v[1] *= -1.0;
+    insertPhysicalObject(planet, pop);
+  }
+
+  {
+    _precisionTestResult._positiveXRange =  {_precisionTestData._x, _precisionTestData._x};
+    _precisionTestResult._negativeXRange =  {1, 1}; // positive value means not initialized
+    _precisionTestResult._positiveXRangeDeviationPercentage = {0, 0};
+    _precisionTestResult._negativeXRangeDiff = 0;
+    _precisionTestResult._negativeXRangeDiffPercentage = 0;
+    _precisionTestResult._orbitCount = 0;
+
+    _precisionTestObjectLastY = 0.0;
+  }
+}
+
+Universe::PrecisionTestResult Universe::getPrecisionTestResult() {
+  lock_guard<mutex> locker(_mutexData);
+  return _precisionTestResult;
+}
+
+void Universe::precisionTestTick() {
+  const PhysicalObject & to = *_objects[0];
+  const double currX = to._position.v[0];
+  const double currY = to._position.v[1];
+
+  if(currY > 0.0 && _precisionTestObjectLastY < 0.0) {
+    if(currX < _precisionTestResult._positiveXRange.first) {
+      _precisionTestResult._positiveXRange.first = currX;
+    }
+    if(currX > _precisionTestResult._positiveXRange.second) {
+      _precisionTestResult._positiveXRange.second = currX;
+    }
+    ++_precisionTestResult._orbitCount;
+  }
+  else if(currY < 0.0 && _precisionTestObjectLastY > 0.0) {
+    if(_precisionTestResult._negativeXRange.first > 0.0) { // uninitialized
+      _precisionTestResult._negativeXRange.first = currX;
+      _precisionTestResult._negativeXRange.second = currX;
+    }
+    if(currX < _precisionTestResult._negativeXRange.first) {
+      _precisionTestResult._negativeXRange.first = currX;
+    }
+    if(currX > _precisionTestResult._negativeXRange.second) {
+      _precisionTestResult._negativeXRange.second = currX;
+    }
+    _precisionTestResult._negativeXRangeDiff =
+        fabs(_precisionTestResult._negativeXRange.first -
+             _precisionTestResult._negativeXRange.second);
+    _precisionTestResult._negativeXRangeDiffPercentage =
+        _precisionTestResult._negativeXRangeDiff / _precisionTestData._x * 100.0;
+  }
+
+  _precisionTestResult._positiveXRangeDeviation.first =
+      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.first);
+  _precisionTestResult._positiveXRangeDeviation.second =
+      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.second);
+
+  _precisionTestResult._positiveXRangeDeviationPercentage.first =
+      _precisionTestResult._positiveXRangeDeviation.first / _precisionTestData._x * 100.0;
+  _precisionTestResult._positiveXRangeDeviationPercentage.second =
+      _precisionTestResult._positiveXRangeDeviation.second / _precisionTestData._x * 100.0;
+
+  _precisionTestObjectLastY = currY;
+
+  if(_precisionTestResult._orbitCount >= _precisionTestData._orbitsToDo) {
+    _stopRequested = true;
+  }
+}
+

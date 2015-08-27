@@ -23,5 +23,6 @@ void paintTracks();
 void reshape(int x, int y);
 void readUniverse(int);
 void setupLocalPhysicalObjectData();
+void printPrecisionTestResult();
 
 #endif /* PROJOPENGL_MAIN_H_ */

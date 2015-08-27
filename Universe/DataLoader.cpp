@@ -174,3 +174,16 @@ bool loadPhysicalObjects(Universe & u) {
   return true;
 }
 
+void loadPrecisionTestData(Universe & u) {
+    Universe::PrecisionTestData ptd;
+    ptd._orbitsToDo = 10;
+    ptd._timeUnit = 0.00001;
+    ptd._x = 100;
+    ptd._velocityY = 10;
+    ptd._mass = 12500.0;
+    ptd._roundsPerSecond = 50;
+    ptd._ticksPerRound = 0;
+    // G=8
+    u.setPrecisionTestData(ptd);
+}
+

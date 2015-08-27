@@ -39,6 +39,26 @@ public:
     PhysicalObjectsContainer _objects;
   };
 
+  struct PrecisionTestData {
+    size_t _orbitsToDo;
+    double _timeUnit; // s; tick time unit
+    double _x;
+    double _velocityY;
+    double _mass;
+    std::size_t _roundsPerSecond; // set to 0 for no limitation
+    std::size_t _ticksPerRound; // set to 0 for no limitation
+  };
+
+  struct PrecisionTestResult {
+    std::pair<double, double> _positiveXRange; // at y~=0
+    std::pair<double, double> _negativeXRange; // at y~=0
+    std::pair<double, double> _positiveXRangeDeviation;
+    std::pair<double, double> _positiveXRangeDeviationPercentage;
+    double _negativeXRangeDiff;
+    double _negativeXRangeDiffPercentage;
+    size_t _orbitCount;
+  };
+
   typedef std::vector<PhysicalObjectProperties> PropertiesT;
 
   Universe();
@@ -49,6 +69,10 @@ public:
   const PropertiesT & getPhysicalObjectsProperties() const { return _properties; }
   bool start();
   void stop(); // TS; can not be started after is stopped
+
+  void setPrecisionTestData(const PrecisionTestData & ptd);
+  bool startPrecisionTest();
+  PrecisionTestResult getPrecisionTestResult(); // TS
 
   void waitForFinish(); // TS
   void getSnapshot(Snapshot & s); // AC; may be called before start()
@@ -64,10 +88,13 @@ private:
   void setRuntimeDataToStartValues();
   void tick();
   bool objectsCollided(const PhysicalObject & obj1, const PhysicalObject & obj2);
+  void precisionTestTick();
 
   // settings:
   Settings _sett;
   DurationT _roundDuration; // if zero then no sleep between rounds
+  PrecisionTestData _precisionTestData;
+  bool _precisionTestMode;
 
   // synchronized runtime data:
   bool _running;
@@ -76,9 +103,11 @@ private:
   double _elapsedTime; // s
   // DateTimeT _beginning
   bool _collisionDetected;
+  PrecisionTestResult _precisionTestResult;
 
   // not synchronized runtime data:
   ClockT::time_point _roundBegin;
+  double _precisionTestObjectLastY;
 
   // synchronized physical objects data:
   PhysicalObjectsContainer _objects;

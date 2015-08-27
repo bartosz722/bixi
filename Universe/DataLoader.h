@@ -5,5 +5,6 @@
 
 bool loadSettings(Universe & u);
 bool loadPhysicalObjects(Universe & u);
+void loadPrecisionTestData(Universe & u);
 
 #endif /* UNIVERSE_DATALOADER_H_ */

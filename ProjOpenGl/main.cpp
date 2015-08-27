@@ -29,6 +29,7 @@ Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
 
+bool precisionTestMode = true;
 bool doPaintPhysicalObejcts = true;
 double firstViewBorder = -1;
 double currentViewBorder = 0.0;
@@ -62,13 +63,18 @@ void printPhysicalObjects(const PhysicalObjectsContainer & poc) {
 }
 
 void setupUniverse() {
-  if(!loadSettings(universe)) {
-    cout << "Failed to load settings\n";
-    exit(1);
+  if(!precisionTestMode) {
+    if(!loadSettings(universe)) {
+      cout << "Failed to load settings\n";
+      exit(1);
+    }
+    if(!loadPhysicalObjects(universe)) {
+      cout << "Failed to load physical objects\n";
+      exit(1);
+    }
   }
-  if(!loadPhysicalObjects(universe)) {
-    cout << "Failed to load physical objects\n";
-    exit(1);
+  else {
+    loadPrecisionTestData(universe);
   }
 
   setupLocalPhysicalObjectData();
@@ -159,15 +165,19 @@ void readUniverse(int) {
   glutTimerFunc(repaintPeriodMs, readUniverse, 0);
 
   universe.getSnapshot(snapshot);
+  if(!snapshot._running) {
+    cout << "Universe stopped.\n";
+    doPaintPhysicalObejcts = false;
+  }
   if(snapshot._collisionDetected) {
-    cout << "collision!\n";
+    cout << "Collision detected!\n";
     printPhysicalObjects(snapshot._objects);
     doPaintPhysicalObejcts = false;
   }
 
   tracker.pushData(snapshot._objects);
 
-  if(readUniverseCallCount % printPhysObjectsPeriod == 0) {
+  if(readUniverseCallCount % printPhysObjectsPeriod == 0 || !doPaintPhysicalObejcts) {
     cout << "current tick: " << snapshot._currentTick << endl;
     printPhysicalObjects(snapshot._objects);
 
@@ -175,6 +185,10 @@ void readUniverse(int) {
     for(const auto & t : tracks) {
       cout << "track of obj " << t.first << " size " << t.second.size() << endl;
       break;
+    }
+
+    if(precisionTestMode) {
+      printPrecisionTestResult();
     }
   }
 
@@ -239,4 +253,19 @@ void setupLocalPhysicalObjectData() {
       tracker.trackObject(objId);
     }
   }
+}
+
+void printPrecisionTestResult() {
+  Universe::PrecisionTestResult ptr = universe.getPrecisionTestResult();
+  cout << "Precision test result: orbits: " << ptr._orbitCount << endl;
+  cout << "_positiveXRange: " << ptr._positiveXRange.first << ", "
+      << ptr._positiveXRange.second << endl;
+  cout << "_negativeXRange: " << ptr._negativeXRange.first << ", "
+      << ptr._negativeXRange.second << endl;
+  cout << "positive x devi: " << ptr._positiveXRangeDeviation.first << " ("
+      << ptr._positiveXRangeDeviationPercentage.first << " %), "
+      << ptr._positiveXRangeDeviation.second << " ("
+      << ptr._positiveXRangeDeviationPercentage.second << " %)" << endl;
+  cout << "negative x diff: " << ptr._negativeXRangeDiff
+      << " (" << ptr._negativeXRangeDiffPercentage << " %)" << endl;
 }
