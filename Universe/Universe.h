@@ -50,12 +50,12 @@ public:
   };
 
   struct PrecisionTestResult {
-    std::pair<double, double> _positiveXRange; // at y~=0
-    std::pair<double, double> _negativeXRange; // at y~=0
-    std::pair<double, double> _positiveXRangeDeviation;
-    std::pair<double, double> _positiveXRangeDeviationPercentage;
-    double _negativeXRangeDiff;
-    double _negativeXRangeDiffPercentage;
+    std::pair<double, double> _rightXRange; // at y~=0
+    std::pair<double, double> _leftXRange; // at y~=0
+    std::pair<double, double> _rightXRangeDeviation;
+    std::pair<double, double> _rightXRangeDeviationPercentage;
+    double _leftXRangeDiff;
+    double _leftXRangeDiffPercentage;
     size_t _orbitCount;
   };
 

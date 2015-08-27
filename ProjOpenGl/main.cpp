@@ -258,14 +258,14 @@ void setupLocalPhysicalObjectData() {
 void printPrecisionTestResult() {
   Universe::PrecisionTestResult ptr = universe.getPrecisionTestResult();
   cout << "Precision test result: orbits: " << ptr._orbitCount << endl;
-  cout << "_positiveXRange: " << ptr._positiveXRange.first << ", "
-      << ptr._positiveXRange.second << endl;
-  cout << "_negativeXRange: " << ptr._negativeXRange.first << ", "
-      << ptr._negativeXRange.second << endl;
-  cout << "positive x devi: " << ptr._positiveXRangeDeviation.first << " ("
-      << ptr._positiveXRangeDeviationPercentage.first << " %), "
-      << ptr._positiveXRangeDeviation.second << " ("
-      << ptr._positiveXRangeDeviationPercentage.second << " %)" << endl;
-  cout << "negative x diff: " << ptr._negativeXRangeDiff
-      << " (" << ptr._negativeXRangeDiffPercentage << " %)" << endl;
+  cout << "_rightXRange: " << ptr._rightXRange.first << ", "
+      << ptr._rightXRange.second << endl;
+  cout << "_leftXRange: " << ptr._leftXRange.first << ", "
+      << ptr._leftXRange.second << endl;
+  cout << "right x devi: " << ptr._rightXRangeDeviation.first << " ("
+      << ptr._rightXRangeDeviationPercentage.first << " %), "
+      << ptr._rightXRangeDeviation.second << " ("
+      << ptr._rightXRangeDeviationPercentage.second << " %)" << endl;
+  cout << "left x diff: " << ptr._leftXRangeDiff
+      << " (" << ptr._leftXRangeDiffPercentage << " %)" << endl;
 }

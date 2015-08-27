@@ -223,11 +223,11 @@ void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
   }
 
   {
-    _precisionTestResult._positiveXRange =  {_precisionTestData._x, _precisionTestData._x};
-    _precisionTestResult._negativeXRange =  {0, 0};
-    _precisionTestResult._positiveXRangeDeviationPercentage = {0, 0};
-    _precisionTestResult._negativeXRangeDiff = 0;
-    _precisionTestResult._negativeXRangeDiffPercentage = 0;
+    _precisionTestResult._rightXRange =  {_precisionTestData._x, _precisionTestData._x};
+    _precisionTestResult._leftXRange =  {0, 0};
+    _precisionTestResult._rightXRangeDeviationPercentage = {0, 0};
+    _precisionTestResult._leftXRangeDiff = 0;
+    _precisionTestResult._leftXRangeDiffPercentage = 0;
     _precisionTestResult._orbitCount = 0;
 
     _precisionTestObjectLastY = 0.0;
@@ -237,21 +237,21 @@ void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
 Universe::PrecisionTestResult Universe::getPrecisionTestResult() {
   lock_guard<mutex> locker(_mutexData);
 
-  _precisionTestResult._positiveXRangeDeviation.first =
-      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.first);
-  _precisionTestResult._positiveXRangeDeviation.second =
-      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.second);
+  _precisionTestResult._rightXRangeDeviation.first =
+      fabs(_precisionTestData._x - _precisionTestResult._rightXRange.first);
+  _precisionTestResult._rightXRangeDeviation.second =
+      fabs(_precisionTestData._x - _precisionTestResult._rightXRange.second);
 
-  _precisionTestResult._positiveXRangeDeviationPercentage.first =
-      _precisionTestResult._positiveXRangeDeviation.first / _precisionTestData._x * 100.0;
-  _precisionTestResult._positiveXRangeDeviationPercentage.second =
-      _precisionTestResult._positiveXRangeDeviation.second / _precisionTestData._x * 100.0;
+  _precisionTestResult._rightXRangeDeviationPercentage.first =
+      _precisionTestResult._rightXRangeDeviation.first / _precisionTestData._x * 100.0;
+  _precisionTestResult._rightXRangeDeviationPercentage.second =
+      _precisionTestResult._rightXRangeDeviation.second / _precisionTestData._x * 100.0;
 
-  _precisionTestResult._negativeXRangeDiff =
-      fabs(_precisionTestResult._negativeXRange.first -
-           _precisionTestResult._negativeXRange.second);
-  _precisionTestResult._negativeXRangeDiffPercentage =
-      _precisionTestResult._negativeXRangeDiff / _precisionTestData._x * 100.0;
+  _precisionTestResult._leftXRangeDiff =
+      fabs(_precisionTestResult._leftXRange.first -
+           _precisionTestResult._leftXRange.second);
+  _precisionTestResult._leftXRangeDiffPercentage =
+      _precisionTestResult._leftXRangeDiff / _precisionTestData._x * 100.0;
 
   return _precisionTestResult;
 }
@@ -262,24 +262,24 @@ void Universe::precisionTestTick() {
   const double currY = to._position.v[1];
 
   if(currY > 0.0 && _precisionTestObjectLastY < 0.0) {
-    if(currX < _precisionTestResult._positiveXRange.first) {
-      _precisionTestResult._positiveXRange.first = currX;
+    if(currX < _precisionTestResult._rightXRange.first) {
+      _precisionTestResult._rightXRange.first = currX;
     }
-    if(currX > _precisionTestResult._positiveXRange.second) {
-      _precisionTestResult._positiveXRange.second = currX;
+    if(currX > _precisionTestResult._rightXRange.second) {
+      _precisionTestResult._rightXRange.second = currX;
     }
     ++_precisionTestResult._orbitCount;
   }
   else if(currY < 0.0 && _precisionTestObjectLastY > 0.0) {
     if(_precisionTestResult._orbitCount == 0) { // uninitialized
-      _precisionTestResult._negativeXRange.first = currX;
-      _precisionTestResult._negativeXRange.second = currX;
+      _precisionTestResult._leftXRange.first = currX;
+      _precisionTestResult._leftXRange.second = currX;
     }
-    if(currX < _precisionTestResult._negativeXRange.first) {
-      _precisionTestResult._negativeXRange.first = currX;
+    if(currX < _precisionTestResult._leftXRange.first) {
+      _precisionTestResult._leftXRange.first = currX;
     }
-    if(currX > _precisionTestResult._negativeXRange.second) {
-      _precisionTestResult._negativeXRange.second = currX;
+    if(currX > _precisionTestResult._leftXRange.second) {
+      _precisionTestResult._leftXRange.second = currX;
     }
   }
 
