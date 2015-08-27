@@ -224,7 +224,7 @@ void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
 
   {
     _precisionTestResult._positiveXRange =  {_precisionTestData._x, _precisionTestData._x};
-    _precisionTestResult._negativeXRange =  {1, 1}; // positive value means not initialized
+    _precisionTestResult._negativeXRange =  {0, 0};
     _precisionTestResult._positiveXRangeDeviationPercentage = {0, 0};
     _precisionTestResult._negativeXRangeDiff = 0;
     _precisionTestResult._negativeXRangeDiffPercentage = 0;
@@ -236,6 +236,23 @@ void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
 
 Universe::PrecisionTestResult Universe::getPrecisionTestResult() {
   lock_guard<mutex> locker(_mutexData);
+
+  _precisionTestResult._positiveXRangeDeviation.first =
+      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.first);
+  _precisionTestResult._positiveXRangeDeviation.second =
+      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.second);
+
+  _precisionTestResult._positiveXRangeDeviationPercentage.first =
+      _precisionTestResult._positiveXRangeDeviation.first / _precisionTestData._x * 100.0;
+  _precisionTestResult._positiveXRangeDeviationPercentage.second =
+      _precisionTestResult._positiveXRangeDeviation.second / _precisionTestData._x * 100.0;
+
+  _precisionTestResult._negativeXRangeDiff =
+      fabs(_precisionTestResult._negativeXRange.first -
+           _precisionTestResult._negativeXRange.second);
+  _precisionTestResult._negativeXRangeDiffPercentage =
+      _precisionTestResult._negativeXRangeDiff / _precisionTestData._x * 100.0;
+
   return _precisionTestResult;
 }
 
@@ -254,7 +271,7 @@ void Universe::precisionTestTick() {
     ++_precisionTestResult._orbitCount;
   }
   else if(currY < 0.0 && _precisionTestObjectLastY > 0.0) {
-    if(_precisionTestResult._negativeXRange.first > 0.0) { // uninitialized
+    if(_precisionTestResult._orbitCount == 0) { // uninitialized
       _precisionTestResult._negativeXRange.first = currX;
       _precisionTestResult._negativeXRange.second = currX;
     }
@@ -264,22 +281,7 @@ void Universe::precisionTestTick() {
     if(currX > _precisionTestResult._negativeXRange.second) {
       _precisionTestResult._negativeXRange.second = currX;
     }
-    _precisionTestResult._negativeXRangeDiff =
-        fabs(_precisionTestResult._negativeXRange.first -
-             _precisionTestResult._negativeXRange.second);
-    _precisionTestResult._negativeXRangeDiffPercentage =
-        _precisionTestResult._negativeXRangeDiff / _precisionTestData._x * 100.0;
   }
-
-  _precisionTestResult._positiveXRangeDeviation.first =
-      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.first);
-  _precisionTestResult._positiveXRangeDeviation.second =
-      fabs(_precisionTestData._x - _precisionTestResult._positiveXRange.second);
-
-  _precisionTestResult._positiveXRangeDeviationPercentage.first =
-      _precisionTestResult._positiveXRangeDeviation.first / _precisionTestData._x * 100.0;
-  _precisionTestResult._positiveXRangeDeviationPercentage.second =
-      _precisionTestResult._positiveXRangeDeviation.second / _precisionTestData._x * 100.0;
 
   _precisionTestObjectLastY = currY;
 
