@@ -8,7 +8,7 @@ using namespace std;
 bool loadSettings(Universe & u) {
   Universe::Settings s;
 
-  s._timeUnit = 0.0002;
+  s._timeUnit = 0.01;
 //  s._timeUnit = 0.01; // A
 //  s._timeUnit = 0.1; // B
 //  s._timeUnit = 0.001; // C
@@ -20,7 +20,7 @@ bool loadSettings(Universe & u) {
 
 
   s._roundsPerSecond = 50;
-  s._ticksPerRound = 100;
+  s._ticksPerRound = 3;
 
   // A2
 //  s._roundsPerSecond = 50;
@@ -59,7 +59,7 @@ bool loadSettings(Universe & u) {
 }
 
 bool loadPhysicalObjects(Universe & u) {
-  int physObjSet = 4;
+  int physObjSet = 2;
 
   PhysicalObjectProperties pop;
 
@@ -175,15 +175,15 @@ bool loadPhysicalObjects(Universe & u) {
 }
 
 void loadPrecisionTestData(Universe & u) {
-    Universe::PrecisionTestData ptd;
-    ptd._orbitsToDo = 10;
-    ptd._timeUnit = 0.00001;
-    ptd._x = 100;
-    ptd._velocityY = 10;
-    ptd._mass = 12500.0;
-    ptd._roundsPerSecond = 50;
-    ptd._ticksPerRound = 0;
-    // G=8
-    u.setPrecisionTestData(ptd);
+  Universe::PrecisionTestData ptd;
+  ptd._orbitsToDo = 10;
+  ptd._timeUnit = 0.01;
+  ptd._x = 100;
+  ptd._velocityY = 10;
+  ptd._mass = 12500.0;
+  ptd._roundsPerSecond = 50;
+  ptd._ticksPerRound = 50;
+  // G=8
+  u.setPrecisionTestData(ptd);
 }
 

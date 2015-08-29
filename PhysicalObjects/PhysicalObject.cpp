@@ -42,14 +42,8 @@ Vector PhysicalObject::distanceTo(const PhysicalObject & other) const {
 }
 
 void PhysicalObject::moveToNextState(double deltaTime) {
-  Vector acc = _force / _mass;
-  Vector acc_t = acc * deltaTime;
-
-  // s = v0*t + 0.5 * a*t^2 = t(v0 + 0.5 * a*t)
-  Vector deltaPosition = (_velocity + acc_t / 2) * deltaTime;
-  _position = _position + deltaPosition;
-  // v = v0 + a*t
-  _velocity = _velocity + acc_t;
+  _velocity = _velocity + _force * (deltaTime / _mass);
+  _position = _position + _velocity * deltaTime;
 }
 
 void PhysicalObject::clearNextStateVariables() {
