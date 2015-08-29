@@ -26,8 +26,8 @@ public:
     double _timeUnit; // s; tick time unit
     bool _detectCollision;
     double _collisionTolerance; // factor (0--1.0]
-    std::size_t _roundsPerSecond; // set to 0 for no limitation
-    std::size_t _ticksPerRound; // set to 0 for no limitation
+    size_t _roundsPerSecond; // set to 0 for no limitation
+    size_t _ticksPerRound; // set to 0 for no limitation
   };
 
   struct Snapshot {
@@ -45,8 +45,8 @@ public:
     double _x;
     double _velocityY;
     double _mass;
-    std::size_t _roundsPerSecond; // set to 0 for no limitation
-    std::size_t _ticksPerRound; // set to 0 for no limitation
+    size_t _roundsPerSecond; // set to 0 for no limitation
+    size_t _ticksPerRound; // set to 0 for no limitation
   };
 
   struct PrecisionTestResult {

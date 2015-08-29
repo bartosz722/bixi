@@ -10,7 +10,7 @@
 
 #include <cstddef>
 
-typedef std::size_t TickT;
+typedef size_t TickT;
 
 template<class EnumType>
 int enumValue(EnumType e) {

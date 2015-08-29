@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <limits>
 #include "Universe.h"
 #include "Assert.h"
 #include "SphericalObject.h"
@@ -58,7 +59,7 @@ void Universe::setSettings(const Settings & s) {
       << " ms" << endl;
 
   if(_sett._ticksPerRound == 0) {
-    _sett._ticksPerRound = 1000000; // some big value
+    _sett._ticksPerRound = numeric_limits<size_t>::max();
   }
   cout << "_ticksPerRound: " << _sett._ticksPerRound << endl;
 }
@@ -94,7 +95,7 @@ void Universe::spacetime() {
   while(true) {
     _roundBegin = ClockT::now();
 
-    for(std::size_t t=0; t<_sett._ticksPerRound; ++t) {
+    for(size_t t=0; t<_sett._ticksPerRound; ++t) {
       lock_guard<mutex> locker(_mutexData);
       if(_stopRequested) {
         _running = false;

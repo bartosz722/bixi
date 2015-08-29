@@ -1,7 +1,7 @@
 #include "Tracker.h"
 #include "Assert.h"
 
-Tracker::Tracker(std::size_t density, std::size_t capacity)
+Tracker::Tracker(size_t density, size_t capacity)
   : _density(density), _capacity(capacity), _pushDataCount(0)
 {
   ASSERT(_density > 0);

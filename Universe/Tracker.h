@@ -13,15 +13,15 @@ public:
 
   // Takes data from 1 in 'density' pushData() calls.
   // 'capacity' - max elements in one track
-  Tracker(std::size_t density, std::size_t capacity);
+  Tracker(size_t density, size_t capacity);
   void trackObject(int id);
   void pushData(const PhysicalObjectsContainer & poc);
   const TrackContainer & getTracks() const { return _tracks; }
 
 private:
-  const std::size_t _density;
-  const std::size_t _capacity;
-  std::size_t _pushDataCount;
+  const size_t _density;
+  const size_t _capacity;
+  size_t _pushDataCount;
   TrackContainer _tracks;
 };
 
