@@ -128,7 +128,7 @@ void Universe::tick() {
     PhysicalObject & obj1 = **it1;
     for(auto it2 = it1 + 1; it2 != _objects.cend(); ++it2) {
       PhysicalObject & obj2 = **it2;
-      Vector gForce = obj1.getGravityForce(obj2);
+      Vector gForce = obj1.getGravityForce(obj2, _sett._G);
       obj1._force = obj1._force + gForce;
       obj2._force = obj2._force + gForce * -1.0;
     }
@@ -199,6 +199,7 @@ void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
   {
     Settings s;
     s._timeUnit = _precisionTestData._timeUnit;
+    s._G = _precisionTestData._G;
     s._detectCollision = true;
     s._collisionTolerance = 0.00001;
     s._roundsPerSecond = _precisionTestData._roundsPerSecond;

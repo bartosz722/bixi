@@ -20,7 +20,7 @@ public:
   void setId(int id);
 
   // Attraction of this object by other object
-  Vector getGravityForce(const PhysicalObject & other) const;
+  Vector getGravityForce(const PhysicalObject & other, double G) const;
   // Distance vector pointed to this
   Vector distanceTo(const PhysicalObject & other) const;
 

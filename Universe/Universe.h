@@ -24,6 +24,7 @@ public:
   struct Settings {
     Settings();
     double _timeUnit; // s; tick time unit
+    double _G; // gravity constant
     bool _detectCollision;
     double _collisionTolerance; // factor (0--1.0]
     size_t _roundsPerSecond; // set to 0 for no limitation
@@ -42,6 +43,7 @@ public:
   struct PrecisionTestData {
     size_t _orbitsToDo;
     double _timeUnit; // s; tick time unit
+    double _G;
     double _x;
     double _velocityY;
     double _mass;

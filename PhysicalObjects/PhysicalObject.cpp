@@ -1,5 +1,4 @@
 #include "PhysicalObject.h"
-#include "PhysicalDefinitions.h"
 #include "Assert.h"
 
 PhysicalObject::PhysicalObject()
@@ -21,7 +20,7 @@ void PhysicalObject::copyFrom(const PhysicalObject & other) {
   new (this) PhysicalObject(other);
 }
 
-Vector PhysicalObject::getGravityForce(const PhysicalObject & other) const {
+Vector PhysicalObject::getGravityForce(const PhysicalObject & other, double G) const {
   Vector distanceVect = distanceTo(other);
   double distance = distanceVect.length();
   double distance_pow2 = distanceVect.length_pow2();
@@ -30,7 +29,7 @@ Vector PhysicalObject::getGravityForce(const PhysicalObject & other) const {
     return Vector();
   }
 
-  double force = constG * _mass * other._mass / distance_pow2;
+  double force = G * _mass * other._mass / distance_pow2;
   // vF = F * -(vR / length(vR))
   Vector forceVect = distanceVect * (force * -1.0 / distance);
 

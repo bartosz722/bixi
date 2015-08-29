@@ -2,64 +2,27 @@
 #include <cmath>
 #include "DataLoader.h"
 #include "SphericalObject.h"
+#include "PhysicalDefinitions.h"
 
 using namespace std;
 
 bool loadSettings(Universe & u) {
   Universe::Settings s;
 
+  s._G = constG;
   s._timeUnit = 0.01;
-//  s._timeUnit = 0.01; // A
-//  s._timeUnit = 0.1; // B
-//  s._timeUnit = 0.001; // C
-//  s._timeUnit = 0.0001; // D
-//  s._timeUnit = 0.00001; // E
+  s._roundsPerSecond = 50;
+  s._ticksPerRound = 1000;
 
   s._detectCollision = true;
   s._collisionTolerance = 0.00001;
-
-
-  s._roundsPerSecond = 50;
-  s._ticksPerRound = 3;
-
-  // A2
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 2;
-
-  // D2
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 200;
-
-  // E2
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 2000;
-
-  // A3
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 10;
-
-  // B3
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 1;
-
-  // C3
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 100;
-
-  // D3
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 1000;
-
-  // E3
-//  s._roundsPerSecond = 50;
-//  s._ticksPerRound = 10000;
 
   u.setSettings(s);
   return true;
 }
 
 bool loadPhysicalObjects(Universe & u) {
-  int physObjSet = 2;
+  int physObjSet = 1;
 
   PhysicalObjectProperties pop;
 
@@ -67,9 +30,9 @@ bool loadPhysicalObjects(Universe & u) {
     SphericalObject earth;
     earth._mass = 5.972 * pow(10, 24);
     earth._position = Vector(0, 0, 0);
-    earth._velocity = Vector(0, -3000, 0);
+    earth._velocity = Vector(0, 0, 0);
     earth._radius = 6370*1000;
-    pop._color = { 77, 100, 20 };
+    pop._color = { 47, 183, 0 };
     pop._tracked = true;
     u.insertPhysicalObject(earth, pop);
 
@@ -87,7 +50,7 @@ bool loadPhysicalObjects(Universe & u) {
     iss._velocity = Vector(0, 7706, 0);
     pop._color = Color();
     pop._tracked = true;
-//    u.insertPhysicalObject(iss, pop);
+    u.insertPhysicalObject(iss, pop);
 
     SphericalObject someRock;
     someRock._mass = earth._mass;
@@ -96,7 +59,7 @@ bool loadPhysicalObjects(Universe & u) {
     someRock._radius = earth._radius;
     pop._color = Color();
     pop._tracked = true;
-    u.insertPhysicalObject(someRock, pop);
+//    u.insertPhysicalObject(someRock, pop);
   }
   else if(physObjSet == 2) {
     //sunsystem.py
@@ -148,8 +111,7 @@ bool loadPhysicalObjects(Universe & u) {
   }
   else if(physObjSet == 4) {
     //G=1;
-    //dt=0.02 - oryginał, ale orbita krzywa
-    //dt=0.0002 - w miare dobrze widać
+    //dt=0.02 - original
     //optimal view: 50 ticks/s for dt=0.02
 
     SphericalObject earth;
@@ -178,12 +140,12 @@ void loadPrecisionTestData(Universe & u) {
   Universe::PrecisionTestData ptd;
   ptd._orbitsToDo = 10;
   ptd._timeUnit = 0.01;
+  ptd._G = 8;
   ptd._x = 100;
   ptd._velocityY = 10;
   ptd._mass = 12500.0;
   ptd._roundsPerSecond = 50;
   ptd._ticksPerRound = 50;
-  // G=8
   u.setPrecisionTestData(ptd);
 }
 

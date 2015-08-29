@@ -29,7 +29,7 @@ Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
 
-bool precisionTestMode = true;
+bool precisionTestMode = false;
 bool doPaintPhysicalObejcts = true;
 double firstViewBorder = -1;
 double currentViewBorder = 0.0;
