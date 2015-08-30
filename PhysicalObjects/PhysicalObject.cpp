@@ -3,6 +3,7 @@
 
 PhysicalObject::PhysicalObject()
   : _mass(0.0)
+  , _active(true)
   , _type(PhysicalObjectType::PhysicalObject)
   , _id(_invalidId)
 {

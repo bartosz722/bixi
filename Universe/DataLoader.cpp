@@ -9,12 +9,12 @@ using namespace std;
 bool loadSettings(Universe & u) {
   Universe::Settings s;
 
-  s._G = constG;
+  s._G = 0.05;//constG;
   s._timeUnit = 0.01;
   s._roundsPerSecond = 50;
-  s._ticksPerRound = 1000;
+  s._ticksPerRound = 100;
 
-  s._detectCollision = true;
+  s._collision = Universe::CollisionBehaviour::Inelastic;
   s._collisionTolerance = 0.00001;
 
   u.setSettings(s);
@@ -22,7 +22,7 @@ bool loadSettings(Universe & u) {
 }
 
 bool loadPhysicalObjects(Universe & u) {
-  int physObjSet = 1;
+  int physObjSet = 5;
 
   PhysicalObjectProperties pop;
 
@@ -131,6 +131,28 @@ bool loadPhysicalObjects(Universe & u) {
     pop._color = Color();
     pop._tracked = true;
     u.insertPhysicalObject(rock, pop);
+  }
+  else if(physObjSet == 5) {
+    // collision test
+    // G = 0.05;
+
+    SphericalObject rock;
+    rock._mass = 100;
+    rock._position = Vector(100, 0, 0);
+    rock._velocity = Vector(-1, 0, 0);
+    rock._radius = 10;
+    pop._color = Color();
+    pop._tracked = true;
+    u.insertPhysicalObject(rock, pop);
+
+    SphericalObject rock2;
+    rock2._mass = 200;
+    rock2._position = Vector(-100, 0, 0);
+    rock2._velocity = Vector(1, 0.03, 0);
+    rock2._radius = 20;
+    pop._color = Color();
+    pop._tracked = true;
+    u.insertPhysicalObject(rock2, pop);
   }
 
   return true;

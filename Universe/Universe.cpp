@@ -1,19 +1,24 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <vector>
+#include <algorithm>
 #include "Universe.h"
 #include "Assert.h"
 #include "SphericalObject.h"
+#include "CollisionComparator.h"
+#include "Math.h"
 
 using namespace std;
 
 Universe::Settings::Settings()
-  : _timeUnit(1.0), _G(1), _detectCollision(false), _collisionTolerance(0.00001)
+  : _timeUnit(1.0), _G(1)
+  , _collision(CollisionBehaviour::None), _collisionTolerance(0.00001)
   , _roundsPerSecond(50), _ticksPerRound(10)
 {}
 
 Universe::Snapshot::Snapshot()
-  : _running(false), _currentTick(0), _elapsedTime(0.0), _collisionDetected(false)
+  : _running(false), _currentTick(0), _elapsedTime(0.0), _stoppedByCollision(false)
 {}
 
 Universe::Universe() {
@@ -37,7 +42,7 @@ void Universe::resetRuntimeData() {
   _stopRequested = false;
   _currentTick = 0;
   _elapsedTime = 0.0;
-  _collisionDetected = false;
+  _stoppedByCollision = false;
   _precisionTestResult = PrecisionTestResult();
 
   _roundBegin = ClockT::now();
@@ -97,7 +102,7 @@ void Universe::spacetime() {
 
     for(size_t t=0; t<_sett._ticksPerRound; ++t) {
       lock_guard<mutex> locker(_mutexData);
-      if(_stopRequested) {
+      if(_stopRequested || _stoppedByCollision) {
         _running = false;
         break;
       }
@@ -117,17 +122,23 @@ void Universe::setRuntimeDataToStartValues() {
   _stopRequested = false;
   _currentTick = 0;
   _elapsedTime = 0.0;
-  _collisionDetected = false;
+  _stoppedByCollision = false;
 }
 
 void Universe::tick() {
-  _collisionDetected = false;
-
   // Calculate gravity force
   for(auto it1 = _objects.cbegin(); it1 != _objects.cend(); ++it1) {
     PhysicalObject & obj1 = **it1;
+    if(!obj1._active) {
+      continue;
+    }
+
     for(auto it2 = it1 + 1; it2 != _objects.cend(); ++it2) {
       PhysicalObject & obj2 = **it2;
+      if(!obj2._active) {
+        continue;
+      }
+
       Vector gForce = obj1.getGravityForce(obj2, _sett._G);
       obj1._force = obj1._force + gForce;
       obj2._force = obj2._force + gForce * -1.0;
@@ -135,21 +146,18 @@ void Universe::tick() {
   }
 
   for(auto const & po : _objects) {
+    if(!po->_active) {
+      continue;
+    }
     po->moveToNextState(_sett._timeUnit);
     po->clearNextStateVariables();
   }
 
+  // From here phys object can be deactivated.
+
   // Check for collisions
-  if(_sett._detectCollision) {
-    for(auto it1 = _objects.cbegin(); it1 != _objects.cend(); ++it1) {
-      const PhysicalObject & obj1 = **it1;
-      for(auto it2 = it1 + 1; it2 != _objects.cend(); ++it2) {
-        const PhysicalObject & obj2 = **it2;
-        if(objectsCollided(obj1, obj2)) {
-          _collisionDetected = true;
-        }
-      }
-    }
+  if(_sett._collision != CollisionBehaviour::None) {
+    checkForCollisions();
   }
 
   ++_currentTick;
@@ -157,6 +165,34 @@ void Universe::tick() {
 
   if(_precisionTestMode) {
     precisionTestTick();
+  }
+}
+
+void Universe::checkForCollisions() {
+  for(auto it1 = _objects.cbegin(); it1 != _objects.cend(); ++it1) {
+    PhysicalObject & obj1 = **it1;
+    if(!obj1._active) {
+      continue;
+    }
+
+    for(auto it2 = it1 + 1; it2 != _objects.cend(); ++it2) {
+      PhysicalObject & obj2 = **it2;
+      if(!obj2._active) {
+        continue;
+      }
+
+      if(objectsCollided(obj1, obj2)) {
+        if(_sett._collision == CollisionBehaviour::StopUniverse) {
+          _stoppedByCollision = true;
+        }
+        else if(_sett._collision == CollisionBehaviour::Inelastic) {
+          inelasticCollision(obj1, obj2);
+        }
+        else {
+          ASSERT(false);
+        }
+      }
+    }
   }
 }
 
@@ -181,12 +217,40 @@ bool Universe::objectsCollided(const PhysicalObject & obj1, const PhysicalObject
   return collision;
 }
 
+void Universe::inelasticCollision(PhysicalObject & obj1, PhysicalObject & obj2) {
+  vector<PhysicalObject *> objects = { &obj1, &obj2 };
+  sort(objects.begin(), objects.end(), CollisionComparator());
+  PhysicalObject & small = *objects[0];
+  PhysicalObject & big = *objects[1];
+
+  big._velocity =
+      (big._velocity * big._mass + small._velocity * small._mass)
+      / (big._mass + small._mass);
+  big._mass = big._mass + small._mass;
+  small._active = false;
+
+  cout << "inelastic collision: big id " << big.getId() << ", small id " << small.getId() << endl;
+
+  if(big.getType() == PhysicalObjectType::SphericalObject &&
+     small.getType() == PhysicalObjectType::SphericalObject) {
+    SphericalObject & big_s = static_cast<SphericalObject &>(big);
+    SphericalObject & small_s = static_cast<SphericalObject &>(small);
+    double bigRadiusPre = big_s._radius;
+    double totalVolume = Math::ballVolume(big_s._radius) + Math::ballVolume(small_s._radius);
+    big_s._radius = Math::ballRadius(totalVolume);
+    cout << "inelastic collision: radius big " << bigRadiusPre
+        << ", radius small " << small_s._radius
+        << ", radius big after " << big_s._radius
+        << endl;
+  }
+}
+
 void Universe::getSnapshot(Snapshot & s) {
   lock_guard<mutex> locker(_mutexData);
   s._running = _running;
   s._currentTick = _currentTick;
   s._elapsedTime = _elapsedTime;
-  s._collisionDetected = _collisionDetected;
+  s._stoppedByCollision = _stoppedByCollision;
   s._objects = _objects;
 }
 
@@ -200,7 +264,7 @@ void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
     Settings s;
     s._timeUnit = _precisionTestData._timeUnit;
     s._G = _precisionTestData._G;
-    s._detectCollision = true;
+    s._collision = CollisionBehaviour::StopUniverse;
     s._collisionTolerance = 0.00001;
     s._roundsPerSecond = _precisionTestData._roundsPerSecond;
     s._ticksPerRound = _precisionTestData._ticksPerRound;

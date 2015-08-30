@@ -33,6 +33,7 @@ public:
   double _mass; // kg
   Vector _position; // m
   Vector _velocity; // m/s, relative to [0,0,0]
+  bool _active;
 
   // Next state variables:
   Vector _force;

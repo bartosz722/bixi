@@ -56,8 +56,10 @@ int main(int argc, char **argv) {
 void printPhysicalObjects(const PhysicalObjectsContainer & poc) {
   for(auto const & po : poc) {
     cout << "object " << po->getId()
-        << ": position " << po->_position
+        << ": active " << po->_active
+        << ", position " << po->_position
         << ", velocity " << po->_velocity << " (abs " << po->_velocity.length() << ")"
+        << ", mass " << po->_mass
         << endl;
   }
 }
@@ -169,9 +171,8 @@ void readUniverse(int) {
     cout << "Universe stopped.\n";
     doPaintPhysicalObejcts = false;
   }
-  if(snapshot._collisionDetected) {
+  if(snapshot._stoppedByCollision) {
     cout << "Collision detected!\n";
-    printPhysicalObjects(snapshot._objects);
     doPaintPhysicalObejcts = false;
   }
 
@@ -180,12 +181,7 @@ void readUniverse(int) {
   if(readUniverseCallCount % printPhysObjectsPeriod == 0 || !doPaintPhysicalObejcts) {
     cout << "current tick: " << snapshot._currentTick << endl;
     printPhysicalObjects(snapshot._objects);
-
-    const auto & tracks = tracker.getTracks();
-    for(const auto & t : tracks) {
-      cout << "track of obj " << t.first << " size " << t.second.size() << endl;
-      break;
-    }
+    cout << "size of longest track: " << tracker.getSizeOfLongestTrack() << endl;
 
     if(precisionTestMode) {
       printPrecisionTestResult();
@@ -201,6 +197,10 @@ void paintPhysicalObjects() {
 
   int i = 0;
   for(const auto & po : snapshot._objects) {
+    if(!po->_active) {
+      continue;
+    }
+
     glColor3ubv(objData[po->getId()]._color.rgbData());
 
     const Vector & pos = po->_position;

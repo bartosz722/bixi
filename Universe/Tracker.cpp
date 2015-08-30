@@ -18,10 +18,19 @@ void Tracker::pushData(const PhysicalObjectsContainer& poc) {
     // Add new elements
     for(const auto & po : poc) {
       auto fi = _tracks.find(po->getId());
-      if(fi != _tracks.end()) {
+      if(fi != _tracks.end() && po->_active) {
         fi->second.push_back(po->_position);
       }
     }
   }
 }
 
+size_t Tracker::getSizeOfLongestTrack() const {
+  size_t max = 0;
+  for(auto & t : _tracks) {
+    if(t.second.size() > max) {
+      max = t.second.size();
+    }
+  }
+  return max;
+}

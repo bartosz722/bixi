@@ -20,12 +20,14 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Universe/DataLoader.h \
            ../Universe/Tracker.h \
            ../Universe/PhysicalObjectProperties.h \
+           ../Universe/CollisionComparator.h \
            ../Utilities/Assert.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
            ../Utilities/Vector.h \
            ../Utilities/CyclicBuffer.h \
            ../Utilities/Color.h \
+           ../Utilities/Math.h \
            ../UtilitiesGl/UtilGlDraw.h \
            ../ProjOpenGl/main.h
 SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
@@ -38,5 +40,6 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../Universe/PhysicalObjectProperties.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp \
+           ../Utilities/Math.cpp \
            ../ProjOpenGl/main.cpp \
            ../UtilitiesGl/UtilGlDraw.cpp

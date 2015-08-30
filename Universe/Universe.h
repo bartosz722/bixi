@@ -21,11 +21,15 @@
 
 class Universe {
 public:
+  enum class CollisionBehaviour {
+    None, StopUniverse, Inelastic
+  };
+
   struct Settings {
     Settings();
     double _timeUnit; // s; tick time unit
     double _G; // gravity constant
-    bool _detectCollision;
+    CollisionBehaviour _collision;
     double _collisionTolerance; // factor (0--1.0]
     size_t _roundsPerSecond; // set to 0 for no limitation
     size_t _ticksPerRound; // set to 0 for no limitation
@@ -36,7 +40,7 @@ public:
     bool _running;
     TickT _currentTick;
     double _elapsedTime;
-    bool _collisionDetected;
+    bool _stoppedByCollision;
     PhysicalObjectsContainer _objects;
   };
 
@@ -89,7 +93,9 @@ private:
   void spacetime(); // main loop is executed here
   void setRuntimeDataToStartValues();
   void tick();
+  void checkForCollisions();
   bool objectsCollided(const PhysicalObject & obj1, const PhysicalObject & obj2);
+  void inelasticCollision(PhysicalObject & obj1, PhysicalObject & obj2);
   void precisionTestTick();
 
   // settings:
@@ -104,7 +110,7 @@ private:
   TickT _currentTick; // always counted from 0
   double _elapsedTime; // s
   // DateTimeT _beginning
-  bool _collisionDetected;
+  bool _stoppedByCollision;
   PrecisionTestResult _precisionTestResult;
 
   // not synchronized runtime data:

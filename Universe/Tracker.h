@@ -17,6 +17,7 @@ public:
   void trackObject(int id);
   void pushData(const PhysicalObjectsContainer & poc);
   const TrackContainer & getTracks() const { return _tracks; }
+  size_t getSizeOfLongestTrack() const;
 
 private:
   const size_t _density;
