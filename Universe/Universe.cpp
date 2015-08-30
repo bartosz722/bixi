@@ -8,7 +8,7 @@
 using namespace std;
 
 Universe::Settings::Settings()
-  : _timeUnit(1.0), _detectCollision(false), _collisionTolerance(0.00001)
+  : _timeUnit(1.0), _G(1), _detectCollision(false), _collisionTolerance(0.00001)
   , _roundsPerSecond(50), _ticksPerRound(10)
 {}
 
