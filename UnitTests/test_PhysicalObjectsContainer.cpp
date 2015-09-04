@@ -38,10 +38,10 @@ TEST(PhysicalObjectsContainer, InsertByPtr) {
 
 TEST(PhysicalObjectsContainer, InsertByRef) {
   PhysicalObjectsContainer poc;
-  PhysicalObject po;
-  SphericalObject so;
   int id = 1;
   for(int i=0; i<10; ++i) {
+    PhysicalObject po;
+    SphericalObject so;
     po.setId(id++);
     so.setId(id++);
     poc.insert(po);
@@ -56,10 +56,10 @@ TEST(PhysicalObjectsContainer, InsertByRef) {
 
 TEST(PhysicalObjectsContainer, OperatorAssignment) {
   PhysicalObjectsContainer poc;
-  PhysicalObject po;
-  SphericalObject so;
   int id = 1;
   for(int i=0; i<10; ++i) {
+    PhysicalObject po;
+    SphericalObject so;
     po.setId(id++);
     so.setId(id++);
     poc.insert(po);
@@ -72,18 +72,24 @@ TEST(PhysicalObjectsContainer, OperatorAssignment) {
   CHECK(basicCompare(poc, poc2));
 
   // source bigger
-  po.setId(id++);
-  poc.insert(po);
-  CHECK(!basicCompare(poc, poc2));
-  poc2 = poc;
-  CHECK(basicCompare(poc, poc2));
+  {
+    PhysicalObject po;
+    po.setId(id++);
+    poc.insert(po);
+    CHECK(!basicCompare(poc, poc2));
+    poc2 = poc;
+    CHECK(basicCompare(poc, poc2));
+  }
 
   // change type
-  so.setId(id++);
-  poc[0] = so.copy();
-  CHECK(!basicCompare(poc, poc2));
-  poc2 = poc;
-  CHECK(basicCompare(poc, poc2));
+  {
+    SphericalObject so;
+    so.setId(id++);
+    poc[0] = so.copy();
+    CHECK(!basicCompare(poc, poc2));
+    poc2 = poc;
+    CHECK(basicCompare(poc, poc2));
+  }
 
   // source smaller
   poc.resize(poc.size()-1);
