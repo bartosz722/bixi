@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cmath>
 #include <limits>
 #include <vector>
 #include <algorithm>
@@ -21,7 +20,9 @@ Universe::Snapshot::Snapshot()
   : _running(false), _currentTick(0), _elapsedTime(0.0), _stoppedByCollision(false)
 {}
 
-Universe::Universe() {
+Universe::Universe()
+  : _precisionTester(_objects)
+{
   resetSettings();
   resetRuntimeData();
   _nextPhysicalObjectId = 0;
@@ -33,7 +34,6 @@ Universe::~Universe() {
 void Universe::resetSettings() {
   _sett = Settings();
   _roundDuration = DurationT::zero();
-  _precisionTestData = PrecisionTestData();
   _precisionTestMode = false;
 }
 
@@ -43,10 +43,8 @@ void Universe::resetRuntimeData() {
   _currentTick = 0;
   _elapsedTime = 0.0;
   _stoppedByCollision = false;
-  _precisionTestResult = PrecisionTestResult();
 
   _roundBegin = ClockT::now();
-  _precisionTestObjectLastY = 0.0;
 }
 
 void Universe::setSettings(const Settings & s) {
@@ -164,7 +162,9 @@ void Universe::tick() {
   _elapsedTime += _sett._timeUnit;
 
   if(_precisionTestMode) {
-    precisionTestTick();
+    if(!_precisionTester.precisionTestTick()) {
+      _stopRequested = true;
+    }
   }
 }
 
@@ -254,105 +254,28 @@ void Universe::getSnapshot(Snapshot & s) {
   s._objects = _objects;
 }
 
-void Universe::setPrecisionTestData(const PrecisionTestData & ptd) {
-  {
-    _precisionTestData = ptd;
-    _precisionTestMode = true;
-  }
+void Universe::setUpPrecisionTest(const PrecisionTester::Settings & ps) {
+  _precisionTestMode = true;
+  _precisionTester.setUp(ps);
 
-  {
-    Settings s;
-    s._timeUnit = _precisionTestData._timeUnit;
-    s._G = _precisionTestData._G;
-    s._collision = CollisionBehaviour::StopUniverse;
-    s._collisionTolerance = 0.00001;
-    s._roundsPerSecond = _precisionTestData._roundsPerSecond;
-    s._ticksPerRound = _precisionTestData._ticksPerRound;
-    setSettings(s);
-  }
+  Settings s;
+  s._timeUnit = ps._timeUnit;
+  s._G = ps._G;
+  s._collision = CollisionBehaviour::StopUniverse;
+  s._collisionTolerance = 0.00001;
+  s._roundsPerSecond = ps._roundsPerSecond;
+  s._ticksPerRound = ps._ticksPerRound;
+  setSettings(s);
 
-  {
-    SphericalObject planet;
-    PhysicalObjectProperties pop;
-
-    planet._mass = _precisionTestData._mass;
-    planet._position = Vector(_precisionTestData._x, 0, 0);
-    planet._velocity = Vector(0, _precisionTestData._velocityY, 0);
-    planet._radius = _precisionTestData._x / 100;
-    pop._color = Color();
-    pop._tracked = true;
-    insertPhysicalObject(planet, pop);
-
-    planet._position.v[0] *= -1.0;
-    planet._velocity.v[1] *= -1.0;
-    insertPhysicalObject(planet, pop);
-  }
-
-  {
-    _precisionTestResult._rightXRange =  {_precisionTestData._x, _precisionTestData._x};
-    _precisionTestResult._leftXRange =  {0, 0};
-    _precisionTestResult._rightXRangeDeviationPercentage = {0, 0};
-    _precisionTestResult._leftXRangeDiff = 0;
-    _precisionTestResult._leftXRangeDiffPercentage = 0;
-    _precisionTestResult._orbitCount = 0;
-
-    _precisionTestObjectLastY = 0.0;
+  PrecisionTester::TestObjects to = _precisionTester.getTestObjects();
+  PhysicalObjectProperties pop;
+  pop._tracked = true;
+  for(const auto & o : to) {
+    insertPhysicalObject(*o, pop);
   }
 }
 
-Universe::PrecisionTestResult Universe::getPrecisionTestResult() {
+PrecisionTester::Result Universe::getPrecisionTestResult() {
   lock_guard<mutex> locker(_mutexData);
-
-  _precisionTestResult._rightXRangeDeviation.first =
-      fabs(_precisionTestData._x - _precisionTestResult._rightXRange.first);
-  _precisionTestResult._rightXRangeDeviation.second =
-      fabs(_precisionTestData._x - _precisionTestResult._rightXRange.second);
-
-  _precisionTestResult._rightXRangeDeviationPercentage.first =
-      _precisionTestResult._rightXRangeDeviation.first / _precisionTestData._x * 100.0;
-  _precisionTestResult._rightXRangeDeviationPercentage.second =
-      _precisionTestResult._rightXRangeDeviation.second / _precisionTestData._x * 100.0;
-
-  _precisionTestResult._leftXRangeDiff =
-      fabs(_precisionTestResult._leftXRange.first -
-           _precisionTestResult._leftXRange.second);
-  _precisionTestResult._leftXRangeDiffPercentage =
-      _precisionTestResult._leftXRangeDiff / _precisionTestData._x * 100.0;
-
-  return _precisionTestResult;
+  return _precisionTester.getPrecisionTestResult();
 }
-
-void Universe::precisionTestTick() {
-  const PhysicalObject & to = *_objects[0];
-  const double currX = to._position.v[0];
-  const double currY = to._position.v[1];
-
-  if(currY > 0.0 && _precisionTestObjectLastY < 0.0) {
-    if(currX < _precisionTestResult._rightXRange.first) {
-      _precisionTestResult._rightXRange.first = currX;
-    }
-    if(currX > _precisionTestResult._rightXRange.second) {
-      _precisionTestResult._rightXRange.second = currX;
-    }
-    ++_precisionTestResult._orbitCount;
-  }
-  else if(currY < 0.0 && _precisionTestObjectLastY > 0.0) {
-    if(_precisionTestResult._orbitCount == 0) { // uninitialized
-      _precisionTestResult._leftXRange.first = currX;
-      _precisionTestResult._leftXRange.second = currX;
-    }
-    if(currX < _precisionTestResult._leftXRange.first) {
-      _precisionTestResult._leftXRange.first = currX;
-    }
-    if(currX > _precisionTestResult._leftXRange.second) {
-      _precisionTestResult._leftXRange.second = currX;
-    }
-  }
-
-  _precisionTestObjectLastY = currY;
-
-  if(_precisionTestResult._orbitCount >= _precisionTestData._orbitsToDo) {
-    _stopRequested = true;
-  }
-}
-

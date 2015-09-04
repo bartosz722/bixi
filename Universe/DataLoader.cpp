@@ -3,6 +3,7 @@
 #include "DataLoader.h"
 #include "SphericalObject.h"
 #include "PhysicalDefinitions.h"
+#include "PrecisionTester.h"
 
 using namespace std;
 
@@ -159,15 +160,15 @@ bool loadPhysicalObjects(Universe & u) {
 }
 
 void loadPrecisionTestData(Universe & u) {
-  Universe::PrecisionTestData ptd;
-  ptd._orbitsToDo = 10;
-  ptd._timeUnit = 0.01;
-  ptd._G = 8;
-  ptd._x = 100;
-  ptd._velocityY = 10;
-  ptd._mass = 12500.0;
-  ptd._roundsPerSecond = 50;
-  ptd._ticksPerRound = 50;
-  u.setPrecisionTestData(ptd);
+  PrecisionTester::Settings pts;
+  pts._orbitsToDo = 10;
+  pts._timeUnit = 0.01;
+  pts._G = 8;
+  pts._x = 100;
+  pts._velocityY = 10;
+  pts._mass = 12500.0;
+  pts._roundsPerSecond = 50;
+  pts._ticksPerRound = 50;
+  u.setUpPrecisionTest(pts);
 }
 

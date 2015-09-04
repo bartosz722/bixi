@@ -29,7 +29,7 @@ Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
 
-bool precisionTestMode = false;
+bool precisionTestMode = true;
 bool doPaintPhysicalObejcts = true;
 double firstViewBorder = -1;
 double currentViewBorder = 0.0;
@@ -256,7 +256,7 @@ void setupLocalPhysicalObjectData() {
 }
 
 void printPrecisionTestResult() {
-  Universe::PrecisionTestResult ptr = universe.getPrecisionTestResult();
+  PrecisionTester::Result ptr = universe.getPrecisionTestResult();
   cout << "Precision test result: orbits: " << ptr._orbitCount << endl;
   cout << "_rightXRange: " << ptr._rightXRange.first << ", "
       << ptr._rightXRange.second << endl;

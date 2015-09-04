@@ -14,6 +14,7 @@
 #include "BasicDefinitions.h"
 #include "PhysicalObjectsContainer.h"
 #include "PhysicalObjectProperties.h"
+#include "PrecisionTester.h"
 
 // Marks:
 // TS - method is thread-safe and may be called only after start() was called.
@@ -44,27 +45,6 @@ public:
     PhysicalObjectsContainer _objects;
   };
 
-  struct PrecisionTestData {
-    size_t _orbitsToDo;
-    double _timeUnit; // s; tick time unit
-    double _G;
-    double _x;
-    double _velocityY;
-    double _mass;
-    size_t _roundsPerSecond; // set to 0 for no limitation
-    size_t _ticksPerRound; // set to 0 for no limitation
-  };
-
-  struct PrecisionTestResult {
-    std::pair<double, double> _rightXRange; // at y~=0
-    std::pair<double, double> _leftXRange; // at y~=0
-    std::pair<double, double> _rightXRangeDeviation;
-    std::pair<double, double> _rightXRangeDeviationPercentage;
-    double _leftXRangeDiff;
-    double _leftXRangeDiffPercentage;
-    size_t _orbitCount;
-  };
-
   typedef std::vector<PhysicalObjectProperties> PropertiesT;
 
   Universe();
@@ -76,9 +56,8 @@ public:
   bool start();
   void stop(); // TS; can not be started after is stopped
 
-  void setPrecisionTestData(const PrecisionTestData & ptd);
-  bool startPrecisionTest();
-  PrecisionTestResult getPrecisionTestResult(); // TS
+  void setUpPrecisionTest(const PrecisionTester::Settings & ps);
+  PrecisionTester::Result getPrecisionTestResult(); // TS
 
   void waitForFinish(); // TS
   void getSnapshot(Snapshot & s); // AC; may be called before start()
@@ -101,7 +80,6 @@ private:
   // settings:
   Settings _sett;
   DurationT _roundDuration; // if zero then no sleep between rounds
-  PrecisionTestData _precisionTestData;
   bool _precisionTestMode;
 
   // synchronized runtime data:
@@ -111,11 +89,9 @@ private:
   double _elapsedTime; // s
   // DateTimeT _beginning
   bool _stoppedByCollision;
-  PrecisionTestResult _precisionTestResult;
 
   // not synchronized runtime data:
   ClockT::time_point _roundBegin;
-  double _precisionTestObjectLastY;
 
   // synchronized physical objects data:
   PhysicalObjectsContainer _objects;
@@ -131,6 +107,8 @@ private:
   std::mutex _mutexData;
   // Id that will be assigned to next inserted object.
   int _nextPhysicalObjectId;
+  // Synchronization rules are described in its header file.
+  PrecisionTester _precisionTester;
 };
 
 #endif /* UNIVERSE_H_ */
