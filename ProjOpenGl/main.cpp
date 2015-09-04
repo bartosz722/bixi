@@ -29,7 +29,7 @@ Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
 
-bool precisionTestMode = true;
+bool precisionTestMode = false;
 bool doPaintPhysicalObejcts = true;
 double firstViewBorder = -1;
 double currentViewBorder = 0.0;
@@ -66,12 +66,8 @@ void printPhysicalObjects(const PhysicalObjectsContainer & poc) {
 
 void setupUniverse() {
   if(!precisionTestMode) {
-    if(!loadSettings(universe)) {
-      cout << "Failed to load settings\n";
-      exit(1);
-    }
-    if(!loadPhysicalObjects(universe)) {
-      cout << "Failed to load physical objects\n";
+    if(!loadUniverseData(universe)) {
+      cout << "Failed to universe data\n";
       exit(1);
     }
   }

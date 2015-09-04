@@ -7,27 +7,21 @@
 
 using namespace std;
 
-bool loadSettings(Universe & u) {
+bool loadUniverseData(Universe & u) {
+  int physObjSet = 1;
+
   Universe::Settings s;
-
-  s._G = 0.05;//constG;
-  s._timeUnit = 0.01;
-  s._roundsPerSecond = 50;
-  s._ticksPerRound = 100;
-
-  s._collision = Universe::CollisionBehaviour::Inelastic;
+  s._collision = Universe::CollisionBehaviour::StopUniverse;
   s._collisionTolerance = 0.00001;
-
-  u.setSettings(s);
-  return true;
-}
-
-bool loadPhysicalObjects(Universe & u) {
-  int physObjSet = 5;
 
   PhysicalObjectProperties pop;
 
   if(physObjSet == 1) {
+    s._G = constG;
+    s._timeUnit = 0.1;
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 200;
+
     SphericalObject earth;
     earth._mass = 5.972 * pow(10, 24);
     earth._position = Vector(0, 0, 0);
@@ -54,18 +48,20 @@ bool loadPhysicalObjects(Universe & u) {
     u.insertPhysicalObject(iss, pop);
 
     SphericalObject someRock;
-    someRock._mass = earth._mass;
+    someRock._mass = earth._mass / 10;
     someRock._position = Vector(earth._radius * 3, 0, 0);
-    someRock._velocity = Vector(0, 3000, 0);
-    someRock._radius = earth._radius;
+    someRock._velocity = Vector(-500, 3000, 0);
+    someRock._radius = earth._radius / 10;
     pop._color = Color();
     pop._tracked = true;
 //    u.insertPhysicalObject(someRock, pop);
   }
   else if(physObjSet == 2) {
-    //sunsystem.py
-    //G=8;
-    //t=0.01 - original
+    // sunsystem.py
+    s._G = 8;
+    s._timeUnit = 0.01; // 0.01 - original
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 2;
 
     SphericalObject sun;
     sun._mass = 1000000;
@@ -95,7 +91,11 @@ bool loadPhysicalObjects(Universe & u) {
     u.insertPhysicalObject(moon, pop);
   }
   else if(physObjSet == 3) {
-    //G=8;
+    // twins
+    s._G = 8;
+    s._timeUnit = 0.01;
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 40;
 
     SphericalObject earth;
     earth._mass = 12500;
@@ -111,9 +111,11 @@ bool loadPhysicalObjects(Universe & u) {
     u.insertPhysicalObject(earth, pop);
   }
   else if(physObjSet == 4) {
-    //G=1;
-    //dt=0.02 - original
-    //optimal view: 50 ticks/s for dt=0.02
+    // orbit.py
+    s._G = 1;
+    s._timeUnit = 0.02; // 0.02 - original
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 5;
 
     SphericalObject earth;
     earth._mass = 2.5;
@@ -135,7 +137,11 @@ bool loadPhysicalObjects(Universe & u) {
   }
   else if(physObjSet == 5) {
     // collision test
-    // G = 0.05;
+    s._G = 0.05;
+    s._timeUnit = 0.01;
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 150;
+    s._collision = Universe::CollisionBehaviour::Inelastic;
 
     SphericalObject rock;
     rock._mass = 100;
@@ -155,6 +161,8 @@ bool loadPhysicalObjects(Universe & u) {
     pop._tracked = true;
     u.insertPhysicalObject(rock2, pop);
   }
+
+  u.setSettings(s);
 
   return true;
 }
