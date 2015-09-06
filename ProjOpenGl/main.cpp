@@ -27,7 +27,6 @@ Universe universe;
 Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
-Camera camera;
 
 bool precisionTestMode = false;
 bool doPaintPhysicalObejcts = true;
@@ -89,7 +88,10 @@ void setupOpenGL(int & argc, char **argv) {
   glutCreateWindow("Ksztalt");
   glutDisplayFunc(paint);
   glutReshapeFunc(reshape);
-//  glutKeyboardFunc(klawiaturka);
+  glutKeyboardFunc(handleKeyPressed);
+
+  camera.setProjection(Camera::Projection::Frustum);
+  camera.setFollowAllObjects(false);
 }
 
 void setViewport() {
@@ -189,15 +191,15 @@ void paintPhysicalObjects() {
     const Vector & pos = po->_position;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const double radius = static_cast<const SphericalObject &>(*po)._radius;
-      drawFilledCircle(pos.v[0], pos.v[1], radius, 30);
+      drawFilledCircle(pos.v[0], pos.v[1], pos.v[2], radius, 30);
     }
     else {
       glLineWidth(lineWidthPix);
       glBegin(GL_LINES);
-      glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] + physObjDrawSize, 0);
-      glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] - physObjDrawSize, 0);
-      glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] + physObjDrawSize, 0);
-      glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] - physObjDrawSize, 0);
+      glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] + physObjDrawSize, pos.v[2]);
+      glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] - physObjDrawSize, pos.v[2]);
+      glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] + physObjDrawSize, pos.v[2]);
+      glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] - physObjDrawSize, pos.v[2]);
       glEnd();
     }
 

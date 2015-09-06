@@ -7,14 +7,23 @@ Camera::Camera()
   : _followAllObjects(true)
   , _projection(Projection::Orto)
   , _updateProjection(true)
-  , _firstUpdateViewCall(true)
   , _extremeCoordinatesInitialized(false)
+  , _frustumNear(1.0)
 {
   _extremeCoordinates.fill(0.0);
 }
 
+void Camera::setFollowAllObjects(bool f) {
+  _followAllObjects = f;
+}
+
+void Camera::setProjection(Projection p) {
+  _projection = p;
+  _updateProjection = true;
+}
+
 void Camera::updateView(const Universe::Snapshot & s) {
-  if(_followAllObjects || _firstUpdateViewCall) {
+  if(_followAllObjects || !_extremeCoordinatesInitialized) {
     updateExtremeCoordinates(s);
     _updateProjection = true;
   }
@@ -24,7 +33,6 @@ void Camera::updateView(const Universe::Snapshot & s) {
   }
 
   _updateProjection = false;
-  _firstUpdateViewCall = false;
 }
 
 void Camera::updateExtremeCoordinates(const Universe::Snapshot & s) {
@@ -105,18 +113,27 @@ void Camera::setProjectionParameters() {
             -_extremeCoordinates[5], -_extremeCoordinates[4]);
   }
   else {
-    // TODO: frustum
+    double far = -_extremeCoordinates[4];
+    if(far < _frustumNear) {
+      far = _frustumNear + 1.0;
+    }
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(_extremeCoordinates[0], _extremeCoordinates[1],
+              _extremeCoordinates[2], _extremeCoordinates[3],
+              _frustumNear, far);
+
+//    std::cout << "_extremeCoordinates: [4]: " << _extremeCoordinates[4]
+//              << ", [5]: " << _extremeCoordinates[5] << std::endl;
+//    std::cout << "frustum: near: " << _frustumNear << ", far: " << far << std::endl;
   }
 }
 
 std::pair<double, double> Camera::getProjectionPlaneSize() const {
-  if(_projection == Projection::Orto) {
-    double x = _extremeCoordinates[1] - _extremeCoordinates[0];
-    double y = _extremeCoordinates[3] - _extremeCoordinates[2];
-    return {x, y};
-  }
-
-  return {0, 0};
+  double x = _extremeCoordinates[1] - _extremeCoordinates[0];
+  double y = _extremeCoordinates[3] - _extremeCoordinates[2];
+  return {x, y};
 }
 
 double Camera::getGreatestCoordinateDifference() const {
@@ -128,4 +145,16 @@ double Camera::getGreatestCoordinateDifference() const {
     }
   }
   return ret;
+}
+
+void Camera::addToFrustumNear(double value) {
+  if(_projection != Projection::Frustum) {
+    return;
+  }
+
+  _frustumNear += value;
+  if(_frustumNear < _frustumNearMin) {
+    _frustumNear = _frustumNearMin;
+  }
+  _updateProjection = true;
 }

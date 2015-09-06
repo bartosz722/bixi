@@ -17,6 +17,12 @@ public:
   void translate();
   void rotate();
 
+  void setFollowAllObjects(bool f);
+  bool getFollowAllObjects() const { return _followAllObjects; }
+  void setProjection(Projection p);
+  Projection getProjection() const { return _projection; }
+  void addToFrustumNear(double value);
+
   void updateView(const Universe::Snapshot & s);
 
   std::pair<double, double> getProjectionPlaneSize() const;
@@ -29,13 +35,14 @@ private:
   void setProjectionParameters();
 
   static constexpr double _extremeCoordinatesMargin = 0.05; // % of extreme coordinate
+  static constexpr double _frustumNearMin = 0.001;
 
   bool _followAllObjects;
   Projection _projection;
   bool _updateProjection;
-  bool _firstUpdateViewCall;
   ExtremeCoordinates _extremeCoordinates;
   bool _extremeCoordinatesInitialized;
+  double _frustumNear;
 };
 
 #endif /* PROJOPENGL_CAMERA_H_ */

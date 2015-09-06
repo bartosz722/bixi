@@ -8,7 +8,7 @@
 using namespace std;
 
 bool loadUniverseData(Universe & u) {
-  int physObjSet = 1;
+  int physObjSet = 6;
 
   Universe::Settings s;
   s._collision = Universe::CollisionBehaviour::StopUniverse;
@@ -160,6 +160,33 @@ bool loadUniverseData(Universe & u) {
     pop._color = Color();
     pop._tracked = true;
     u.insertPhysicalObject(rock2, pop);
+  }
+  else if(physObjSet == 6) {
+    // frustum test
+    s._G = constG;
+    s._timeUnit = 0.1;
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 200;
+
+    SphericalObject earth;
+    earth._mass = 5.972 * pow(10, 24);
+    earth._position = Vector(0, 0, -3);
+    earth._velocity = Vector(0, 0, 0);
+    earth._radius = 6370*1000;
+    pop._color = { 47, 183, 0 };
+    pop._tracked = true;
+    u.insertPhysicalObject(earth, pop);
+
+    PhysicalObject iss;
+    iss._mass = 417289;
+    iss._position = Vector(earth._radius + 430*1000, 0, -3);
+//    iss._position = Vector(0, 0, -(earth._radius + 430*1000));
+//    double a = (earth._radius + 430*1000) / sqrt(2);
+//    iss._position = Vector(a, 0, -a); // FIXME: does NOT look good
+    iss._velocity = Vector(0, 7706, 0);
+    pop._color = Color();
+    pop._tracked = true;
+    u.insertPhysicalObject(iss, pop);
   }
 
   u.setSettings(s);

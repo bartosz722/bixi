@@ -1,9 +1,9 @@
 #include <GL/glut.h>
 #include <cmath>
 
-void drawFilledCircle(double centerX, double centerY, double radius, int parts) {
+void drawFilledCircle(double centerX, double centerY, double centerZ, double radius, int parts) {
   glPushMatrix();
-  glTranslated(centerX, centerY, 0);
+  glTranslated(centerX, centerY, centerZ);
 
   const double angleStep = 2 * M_PI / parts;
   double currAngle = angleStep;
