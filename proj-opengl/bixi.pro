@@ -30,7 +30,8 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Utilities/Color.h \
            ../Utilities/Math.h \
            ../UtilitiesGl/UtilGlDraw.h \
-           ../ProjOpenGl/main.h
+           ../ProjOpenGl/main.h \
+           ../ProjOpenGl/Camera.h
 SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../PhysicalObjects/Spacecraft.cpp \
            ../PhysicalObjects/SphericalObject.cpp \
@@ -43,5 +44,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp \
            ../Utilities/Math.cpp \
+           ../UtilitiesGl/UtilGlDraw.cpp \
            ../ProjOpenGl/main.cpp \
-           ../UtilitiesGl/UtilGlDraw.cpp
+           ../ProjOpenGl/Camera.cpp
+           

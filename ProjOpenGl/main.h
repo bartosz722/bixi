@@ -13,6 +13,7 @@
 #include "DataLoader.h"
 #include "Tracker.h"
 #include "PhysicalObjectsContainer.h"
+#include "Camera.h"
 
 void printPhysicalObjects(const PhysicalObjectsContainer & poc);
 void setupUniverse();

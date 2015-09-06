@@ -6,10 +6,9 @@ const int windowWidth = 800;
 const int windowHeight = 800;
 const int repaintPeriodMs = 20;
 const int printPhysObjectsPeriod = 50 * 3; // unit: one readUniverse() call
-const double physicalObjectSize = 0.03; // % of wiew width
+const double physicalObjectSize = 0.02; // % of something
 const int lineWidthPix = 3;
 const int lineWidthTrack = 1;
-const double viewBorderMargin = 0.2; // % of extreme coordinate
 const size_t trackLength = 1000;
 const size_t trackDensity = 2;
 
@@ -28,6 +27,7 @@ Universe universe;
 Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
+Camera camera;
 
 bool precisionTestMode = false;
 bool doPaintPhysicalObejcts = true;
@@ -92,40 +92,28 @@ void setupOpenGL(int & argc, char **argv) {
 //  glutKeyboardFunc(klawiaturka);
 }
 
-void setProjectionData() {
-  double physicalObjectExtremum = 0.0;
-  for(const auto & po : snapshot._objects) {
-    const auto & pos = po->_position;
-    if(fabs(pos.v[0]) > physicalObjectExtremum) {
-      physicalObjectExtremum = fabs(pos.v[0]);
-    }
-    if(fabs(pos.v[1]) > physicalObjectExtremum) {
-      physicalObjectExtremum = fabs(pos.v[1]);
-    }
+void setViewport() {
+  auto projSize = camera.getProjectionPlaneSize();
+  double ratio = projSize.second / projSize.first;
+  double vx = windowWidth;
+  double vy = ratio * vx;
+  if(vy > windowHeight) {
+    vy = windowHeight;
+    vx = vy / ratio;
   }
 
-  double newViewBorder = physicalObjectExtremum * (1.0 + viewBorderMargin);
-  if(newViewBorder > currentViewBorder) {
-    currentViewBorder = newViewBorder;
-  }
-  if(firstViewBorder < 0.0) {
-    firstViewBorder = currentViewBorder;
-  }
+  double offsetX = (windowWidth - vx) / 2;
+  double offsetY = (windowHeight - vy) / 2;
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity(); // ustaw macierz rzutowania jako jednostkową
-  glOrtho(-currentViewBorder, currentViewBorder, -currentViewBorder, currentViewBorder,
-          -0.5, 0.5);
+  glViewport(offsetX, offsetY, vx, vy);
 }
 
 void paint() {
-  setProjectionData();
+  camera.updateView(snapshot);
+  setViewport();
 
   glClearColor(1, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT);
-
-  glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity();
 
   glColor3f(1.0, 0.0, 0.0);
   glLineWidth(lineWidthPix);
@@ -148,7 +136,6 @@ void paint() {
 }
 
 void reshape(int, int) {
-//  glViewport(0, 0, 800, 800);
   paint();
 }
 
@@ -189,7 +176,7 @@ void readUniverse(int) {
 }
 
 void paintPhysicalObjects() {
-  const double physObjDrawSize = currentViewBorder * physicalObjectSize;
+  const double physObjDrawSize = camera.getGreatestCoordinateDifference() * physicalObjectSize;
 
   int i = 0;
   for(const auto & po : snapshot._objects) {
