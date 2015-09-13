@@ -19,10 +19,11 @@ public:
 
   void setFollowAllObjects(bool f);
   bool getFollowAllObjects() const { return _followAllObjects; }
+
   void setProjection(Projection p);
   Projection getProjection() const { return _projection; }
-  void addToFrustumNear(double value);
 
+  void addToFrustumNear(double value);
   void updateView(const Universe::Snapshot & s);
 
   std::pair<double, double> getProjectionPlaneSize() const;
@@ -31,10 +32,13 @@ public:
 private:
   typedef std::array<double, 6> ExtremeCoordinates; // xl, xr, yb, yt, zf, zn
 
-  void updateExtremeCoordinates(const Universe::Snapshot & s);
+  // returns: "visible" object found
+  bool getExtremeCoordinates(ExtremeCoordinates & result, bool useFrustumNearMin);
+  void updateExtremeCoordinates(bool useFrustumNearMin);
+  void updateFrustumParameters();
   void setProjectionParameters();
 
-  static constexpr double _extremeCoordinatesMargin = 0.05; // % of extreme coordinate
+  static constexpr double _extremeCoordinatesMargin = 0.05; // fraction of extreme coordinate
   static constexpr double _frustumNearMin = 0.001;
 
   bool _followAllObjects;
@@ -43,6 +47,11 @@ private:
   ExtremeCoordinates _extremeCoordinates;
   bool _extremeCoordinatesInitialized;
   double _frustumNear;
+  double _frustumLeft;
+  double _frustumDown;
+  bool _frustumParemetersInitialized;
+  const PhysicalObjectsContainer * _currObjects;
+  std::pair<double, double> _projectionPlaneSize;
 };
 
 #endif /* PROJOPENGL_CAMERA_H_ */

@@ -169,24 +169,37 @@ bool loadUniverseData(Universe & u) {
     s._ticksPerRound = 200;
 
     SphericalObject earth;
-    earth._mass = 5.972 * pow(10, 24);
-    earth._position = Vector(0, 0, -3);
-    earth._velocity = Vector(0, 0, 0);
     earth._radius = 6370*1000;
+    earth._mass = 5.972 * pow(10, 24);
+    earth._position = Vector(0, 0, -(earth._radius * 2));
+    earth._velocity = Vector(0, 0, 0);
     pop._color = { 47, 183, 0 };
     pop._tracked = true;
     u.insertPhysicalObject(earth, pop);
 
-    PhysicalObject iss;
+    SphericalObject iss;
+    iss._radius = 1000 * 300;
     iss._mass = 417289;
-    iss._position = Vector(earth._radius + 430*1000, 0, -3);
-//    iss._position = Vector(0, 0, -(earth._radius + 430*1000));
-//    double a = (earth._radius + 430*1000) / sqrt(2);
-//    iss._position = Vector(a, 0, -a); // FIXME: does NOT look good
+
+    double a = (earth._radius + 430*1000);
+    double angle = (70 / 180.0 * M_PI);
+    double x = a * cos(angle);
+    double z = a * sin(angle);
+    iss._position = Vector(x, 0, z + earth._position.v[2]);
+
     iss._velocity = Vector(0, 7706, 0);
     pop._color = Color();
     pop._tracked = true;
     u.insertPhysicalObject(iss, pop);
+
+    SphericalObject rock;
+    rock._mass = 5.972 * pow(10, 24);
+    rock._position = Vector(0, 0, -(3));
+    rock._velocity = Vector(0, 1000 * 2, -0.05);
+    rock._radius = 1000 * 300;
+    pop._color = { 47, 183, 0 };
+    pop._tracked = true;
+//    u.insertPhysicalObject(rock, pop);
   }
 
   u.setSettings(s);

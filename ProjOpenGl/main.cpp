@@ -6,7 +6,7 @@ const int windowWidth = 800;
 const int windowHeight = 800;
 const int repaintPeriodMs = 20;
 const int printPhysObjectsPeriod = 50 * 3; // unit: one readUniverse() call
-const double physicalObjectSize = 0.02; // % of something
+const double physicalObjectSize = 0.02; // fraction of something
 const int lineWidthPix = 3;
 const int lineWidthTrack = 1;
 const size_t trackLength = 1000;
@@ -90,8 +90,8 @@ void setupOpenGL(int & argc, char **argv) {
   glutReshapeFunc(reshape);
   glutKeyboardFunc(handleKeyPressed);
 
-  camera.setProjection(Camera::Projection::Frustum);
-  camera.setFollowAllObjects(false);
+  camera.setProjection(Camera::Projection::Orto);
+  camera.setFollowAllObjects(true);
 }
 
 void setViewport() {
