@@ -12,10 +12,12 @@ public:
     Frustum,
   };
 
+  enum class Axis { X, Y, Z };
+
   Camera();
 
-  void translate();
-  void rotate();
+  void translate(Axis a, double factor);
+  void rotate(Axis a, double angleDeg);
 
   void setFollowAllObjects(bool f);
   bool getFollowAllObjects() const { return _followAllObjects; }
@@ -37,6 +39,8 @@ private:
   void updateExtremeCoordinates(bool useFrustumNearMin);
   void updateFrustumParameters();
   void setProjectionParameters();
+  void storeModelViewMatrixAndLoad1();
+  void multiplyByStoredModelViewMatrix();
 
   static constexpr double _extremeCoordinatesMargin = 0.05; // fraction of extreme coordinate
   static constexpr double _frustumNearMin = 0.001;
@@ -52,6 +56,7 @@ private:
   bool _frustumParemetersInitialized;
   const PhysicalObjectsContainer * _currObjects;
   std::pair<double, double> _projectionPlaneSize;
+  double storedModelViewMatrix[16];
 };
 
 #endif /* PROJOPENGL_CAMERA_H_ */

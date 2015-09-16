@@ -22,6 +22,12 @@ Camera::Camera()
 
 void Camera::setFollowAllObjects(bool f) {
   _followAllObjects = f;
+
+  if(_followAllObjects) {
+    // temporary actions
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+  }
 }
 
 void Camera::setProjection(Projection p) {
@@ -29,12 +35,17 @@ void Camera::setProjection(Projection p) {
   _updateProjection = true;
   _extremeCoordinatesInitialized = false;
   _frustumParemetersInitialized = false;
+
+  // temporary actions
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  _followAllObjects = true;
 }
 
 void Camera::updateView(const Universe::Snapshot & s) {
   _currObjects = &s._objects;
 
-  if(_followAllObjects || _updateProjection || !_extremeCoordinatesInitialized) {
+  if(_followAllObjects || !_extremeCoordinatesInitialized) {
     updateExtremeCoordinates(_projection == Projection::Frustum);
     if(_projection == Projection::Frustum) {
       updateFrustumParameters();
@@ -244,6 +255,7 @@ void Camera::updateFrustumParameters() {
     someObjectsFound = true;
 
     // TODO: margins
+    // TODO: div by zero checking
     double currAX = (std::abs(tp.v[0]) + radius) / std::abs(tp.v[2]);
     double currAY = (std::abs(tp.v[1]) + radius) / std::abs(tp.v[2]);
 
@@ -277,4 +289,70 @@ void Camera::updateFrustumParameters() {
       }
     }
   }
+}
+
+void Camera::translate(Axis a, double factor) {
+  if(!_extremeCoordinatesInitialized) {
+    return;
+  }
+
+  double tx = 0, ty = 0, tz = 0;
+  double diff = 0;
+
+  switch(a) {
+  case Axis::X:
+    diff = _extremeCoordinates[1] - _extremeCoordinates[0]; // TODO: some other reference value
+    tx = diff * factor;
+    break;
+  case Axis::Y:
+    diff = _extremeCoordinates[3] - _extremeCoordinates[2];
+    ty = diff * factor;
+    break;
+  case Axis::Z:
+    diff = _extremeCoordinates[5] - _extremeCoordinates[4];
+    tz = diff * factor;
+    break;
+  }
+
+  storeModelViewMatrixAndLoad1();
+  glTranslated(tx, ty, tz);
+  multiplyByStoredModelViewMatrix();
+
+  _followAllObjects = false;
+}
+
+void Camera::rotate(Axis a, double angleDeg) {
+  if(!_extremeCoordinatesInitialized) {
+    return;
+  }
+
+  double rx = 0, ry = 0, rz = 0;
+
+  switch(a) {
+  case Axis::X:
+    rx = 1;
+    break;
+  case Axis::Y:
+    ry = 1;
+    break;
+  case Axis::Z:
+    rz = 1;
+    break;
+  }
+
+  storeModelViewMatrixAndLoad1();
+  glRotated(angleDeg, rx, ry, rz);
+  multiplyByStoredModelViewMatrix();
+
+  _followAllObjects = false;
+}
+
+void Camera::storeModelViewMatrixAndLoad1() {
+  glMatrixMode(GL_MODELVIEW);
+  glGetDoublev(GL_MODELVIEW_MATRIX, storedModelViewMatrix);
+  glLoadIdentity();
+}
+
+void Camera::multiplyByStoredModelViewMatrix() {
+  glMultMatrixd(storedModelViewMatrix);
 }
