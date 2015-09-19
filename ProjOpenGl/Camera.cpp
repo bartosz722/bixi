@@ -4,6 +4,7 @@
 #include <GL/gl.h>
 #include "Camera.h"
 #include "SphericalObject.h"
+#include "Assert.h"
 
 Camera::Camera()
   : _followAllObjects(true)
@@ -30,6 +31,7 @@ void Camera::setProjection(Projection p) {
   _extremeCoordinates._valid = false;
   _ortoParams._valid = false;
   _frustumParams._valid = false;
+  // FIXME: nie chce kamera pokazać wszystkiego po zmianie rzutowania
 }
 
 // jesli orto to:
@@ -70,15 +72,15 @@ void Camera::readExtremeCoordinates() {
   _extremeCoordinates._valid = false;
   bool someObjectsFound = false;
 
+  loadModelViewMatrixToCache();
+
   // Find extreme coordinates for current states of objects
   for(auto & po : *_currObjects) {
     if(!po->_active) {
       continue;
     }
 
-    // tp - position translated by model-view matrix
-    // TODO: don't assume this matrix is identity
-    const Vector tp = po->_position;
+    const auto tp = cachedModelViewMatrix_Mul_Vector(po->_position);
 
     double radius = 0.0;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
@@ -88,7 +90,7 @@ void Camera::readExtremeCoordinates() {
 
     if(!someObjectsFound) {
       for(int i=0; i<3; ++i) {
-        _extremeCoordinates._coord[2*i] = _extremeCoordinates._coord[2*i+1] = tp.v[i];
+        _extremeCoordinates._coord[2*i] = _extremeCoordinates._coord[2*i+1] = tp[i];
       }
       someObjectsFound = true;
     }
@@ -96,8 +98,8 @@ void Camera::readExtremeCoordinates() {
     for(int i=0; i<3; ++i) {
       double & extLeft = _extremeCoordinates._coord[2*i];
       double & extRight = _extremeCoordinates._coord[2*i+1];
-      double left = tp.v[i] - radius;
-      double right = tp.v[i] + radius;
+      double left = tp[i] - radius;
+      double right = tp[i] + radius;
       if(left < extLeft) {
         extLeft = left;
       }
@@ -129,7 +131,7 @@ void Camera::setOptimalPositionForCamera() {
     return;
   }
 
-  GlVector translVect;
+  GlVector translVect; // TOOD: użyć typu z glm
 
   // move back to see all objects
   if(_extremeCoordinates._coord[5] > 0) {
@@ -146,7 +148,7 @@ void Camera::setOptimalPositionForCamera() {
 }
 
 void Camera::translateWorld(GlVector tv) {
-  std::cout << "translateWorld() vect: " << tv._x << ", " << tv._y << ", " << tv._z << "\n";
+//  std::cout << "translateWorld() vect: " << tv._x << ", " << tv._y << ", " << tv._z << "\n";
 
   storeModelViewMatrixAndLoad1();
   glTranslated(tv._x, tv._y, tv._z);
@@ -162,11 +164,11 @@ void Camera::calculateProjectionParameters() {
 
   if(_projection == Projection::Orto) {
     _ortoParams = getOrtoParamsToSeeAll();
-    std::cout << "orto params: " << _ortoParams.toString() << std::endl;
+//    std::cout << "orto params: " << _ortoParams.toString() << std::endl;
   }
   else {
     _frustumParams = getFrustumParamsToSeeAllInFrontOfCamera();
-    std::cout << "frustum params: " << _frustumParams.toString() << std::endl;
+//    std::cout << "frustum params: " << _frustumParams.toString() << std::endl;
   }
 }
 
@@ -187,6 +189,8 @@ Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
   double aX = 0, aY = 0;
   bool someObjectsFound = false;
 
+  loadModelViewMatrixToCache();
+
   for(auto & po : *_currObjects) {
     if(!po->_active) {
       continue;
@@ -194,17 +198,15 @@ Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
 
     // TODO: margins!
 
-    // tp - position translated by model-view matrix
-    // TODO: don't assume this matrix is identity
-    const Vector tp = po->_position;
+    const auto tp = cachedModelViewMatrix_Mul_Vector(po->_position);
 
     double radius = 1; // set small radius for objects with no radius
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const SphericalObject & so = static_cast<const SphericalObject &>(*po);
       radius = so._radius;
     }
-    double minusZMinusRadius = -tp.v[2] - radius;
-    double minusZPlusRadius = -tp.v[2] + radius;
+    double minusZMinusRadius = -tp[2] - radius;
+    double minusZPlusRadius = -tp[2] + radius;
 
     if(minusZMinusRadius < _frustumNearMin) {
       continue;
@@ -224,8 +226,8 @@ Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
     }
 
     // div by zero won't occur
-    double currAX = (std::abs(tp.v[0]) + radius) / std::abs(tp.v[2]);
-    double currAY = (std::abs(tp.v[1]) + radius) / std::abs(tp.v[2]);
+    double currAX = (std::abs(tp[0]) + radius) / std::abs(tp[2]);
+    double currAY = (std::abs(tp[1]) + radius) / std::abs(tp[2]);
 
     if(currAX > aX) {
       aX = currAX;
@@ -242,6 +244,8 @@ Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
     ret._top = aY * ret._near;
     ret._bottom = -ret._top;
     ret._valid = true;
+
+//    std::cout << "frustum: aX: " << aX << ", aY: " << aY << std::endl;
   }
 
   return ret;
@@ -272,9 +276,9 @@ void Camera::useProjectionParameters() {
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(_frustumParams._left, _frustumParams._right,
-            _frustumParams._bottom, _frustumParams._top,
-            _frustumParams._near, _frustumParams._far);
+    glFrustum(_frustumParams._left, _frustumParams._right,
+              _frustumParams._bottom, _frustumParams._top,
+              _frustumParams._near, _frustumParams._far);
   }
 }
 
@@ -308,6 +312,9 @@ void Camera::addToFrustumNear(double value) {
     _frustumParams._far = _frustumParams._near + std::abs(value);
   }
 
+  std::cout << "addToFrustumNear(): near " << _frustumParams._near
+      << ", far " << _frustumParams._far << std::endl;
+
   _updateGlProjection = true;
   _followAllObjects = false;
 }
@@ -335,6 +342,8 @@ void Camera::translate(Axis a, double factor) {
     tz = diff * factor;
     break;
   }
+
+  std::cout << "translate(): " << tx << ", " << ty << ", " << tz << std::endl;
 
   storeModelViewMatrixAndLoad1();
   glTranslated(tx, ty, tz);
@@ -373,4 +382,14 @@ void Camera::storeModelViewMatrixAndLoad1() {
 
 void Camera::multiplyByStoredModelViewMatrix() {
   glMultMatrixd(_storedModelViewMatrix);
+}
+
+void Camera::loadModelViewMatrixToCache() {
+  glGetDoublev(GL_MODELVIEW_MATRIX, &_cachedModelViewMatrix[0][0]);
+}
+
+glm::dvec4 Camera::cachedModelViewMatrix_Mul_Vector(const Vector & v) {
+  glm::dvec4 point = { v.v[0], v.v[1], v.v[2], 1 };
+  glm::dvec4 ret = _cachedModelViewMatrix * point;
+  return ret;
 }

@@ -4,6 +4,7 @@
 #include <array>
 #include <utility>
 #include <sstream>
+#include <glm/glm.hpp>
 #include "Universe.h"
 
 class Camera {
@@ -62,7 +63,7 @@ private:
   };
 
   void readExtremeCoordinates();
-  void setOptimalPositionForCamera(); // may interact with proj parameters
+  void setOptimalPositionForCamera();
   void calculateProjectionParameters();
   void useProjectionParameters();
   void storeModelViewMatrixAndLoad1();
@@ -71,6 +72,8 @@ private:
   ProjParams getOrtoParamsToSeeAll();
   ProjParams getFrustumParamsToSeeAllInFrontOfCamera();
   void translateWorld(GlVector tv);
+  void loadModelViewMatrixToCache();
+  glm::dvec4 cachedModelViewMatrix_Mul_Vector(const Vector & v);
 
   static constexpr double _extremeCoordinatesMargin = 0.05; // fraction of extreme coordinate
   static constexpr double _frustumNearMin = 0.001;
@@ -86,6 +89,7 @@ private:
   const PhysicalObjectsContainer * _currObjects;
   std::pair<double, double> _projectionPlaneSize;
   double _storedModelViewMatrix[16];
+  glm::dmat4x4 _cachedModelViewMatrix;
 };
 
 #endif /* PROJOPENGL_CAMERA_H_ */
