@@ -8,16 +8,10 @@
 Camera::Camera()
   : _followAllObjects(true)
   , _projection(Projection::Orto)
-  , _updateProjection(true)
-  , _extremeCoordinatesInitialized(false)
-  , _frustumNear(_frustumNearMin)
-  , _frustumLeft(-1)
-  , _frustumDown(-1)
-  , _frustumParemetersInitialized(false)
+  , _updateGlProjection(true)
   , _currObjects(NULL)
   , _projectionPlaneSize(0,0)
 {
-  _extremeCoordinates.fill(0.0);
 }
 
 void Camera::setFollowAllObjects(bool f) {
@@ -32,39 +26,48 @@ void Camera::setFollowAllObjects(bool f) {
 
 void Camera::setProjection(Projection p) {
   _projection = p;
-  _updateProjection = true;
-  _extremeCoordinatesInitialized = false;
-  _frustumParemetersInitialized = false;
-
-  // temporary actions
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  _followAllObjects = true;
+  _updateGlProjection = true;
+  _extremeCoordinates._valid = false;
+  _ortoParams._valid = false;
+  _frustumParams._valid = false;
 }
+
+// jesli orto to:
+// - cofaj kamere jeśli obiekt zbliżył się do kamery - nie trzeba w tym rzutowaniu
+// - centruj kamere tylko jeśli poszerzane jest również pole widzenia
+
+// jeśli frustum to:
+// - cofaj kamere jeśli obiekt zbliżył się do kamery, parametry frustum są resetowane wtedy
+// - centrum się nie zmienia, pole widzenia może być tylko poszerzane i tylko symetrycznie
 
 void Camera::updateView(const Universe::Snapshot & s) {
   _currObjects = &s._objects;
 
-  if(_followAllObjects || !_extremeCoordinatesInitialized) {
-    updateExtremeCoordinates(_projection == Projection::Frustum);
-    if(_projection == Projection::Frustum) {
-      updateFrustumParameters();
-    }
-    _updateProjection = true;
+  if(_followAllObjects || !projectionParametersValid()) {
+    readExtremeCoordinates();
+    setOptimalPositionForCamera(); // may interact with proj parameters
+    calculateProjectionParameters();
+    _updateGlProjection = true;
   }
 
-  if(!_extremeCoordinatesInitialized) {
-    return;
+  if(_updateGlProjection) {
+    useProjectionParameters();
   }
 
-  if(_updateProjection) {
-    setProjectionParameters();
-  }
-
-  _updateProjection = false;
+  _updateGlProjection = false;
 }
 
-bool Camera::getExtremeCoordinates(ExtremeCoordinates & result, bool useFrustumNearMin) {
+bool Camera::projectionParametersValid() {
+  if(_projection == Projection::Orto) {
+    return _ortoParams._valid;
+  }
+  else {
+    return _frustumParams._valid;
+  }
+}
+
+void Camera::readExtremeCoordinates() {
+  _extremeCoordinates._valid = false;
   bool someObjectsFound = false;
 
   // Find extreme coordinates for current states of objects
@@ -83,22 +86,16 @@ bool Camera::getExtremeCoordinates(ExtremeCoordinates & result, bool useFrustumN
       radius = so._radius;
     }
 
-    if(useFrustumNearMin) {
-      if(tp.v[2] + radius > -_frustumNearMin) {
-        continue;
-      }
-    }
-
     if(!someObjectsFound) {
       for(int i=0; i<3; ++i) {
-        result[2*i] = result[2*i+1] = tp.v[i];
+        _extremeCoordinates._coord[2*i] = _extremeCoordinates._coord[2*i+1] = tp.v[i];
       }
       someObjectsFound = true;
     }
 
     for(int i=0; i<3; ++i) {
-      double & extLeft = result[2*i];
-      double & extRight = result[2*i+1];
+      double & extLeft = _extremeCoordinates._coord[2*i];
+      double & extRight = _extremeCoordinates._coord[2*i+1];
       double left = tp.v[i] - radius;
       double right = tp.v[i] + radius;
       if(left < extLeft) {
@@ -111,125 +108,82 @@ bool Camera::getExtremeCoordinates(ExtremeCoordinates & result, bool useFrustumN
   }
 
   if(!someObjectsFound) {
-    result[0] = -1; result[1] = 1;
-    result[2] = -1; result[3] = 1;
-    result[4] = -2; result[5] = -1;
-    return false;
+    _extremeCoordinates._coord.fill(0);
   }
-
-  // Add margin for found extreme coordinates
-  for(int i=0; i<3; ++i) {
-    double diff = result[2*i+1] - result[2*i];
-    if(diff < 0.001) {
-      diff = 1.0;
+  else {
+    // Add margin for found extreme coordinates
+    for(int i=0; i<3; ++i) {
+      double diff = _extremeCoordinates._coord[2*i+1] - _extremeCoordinates._coord[2*i];
+      if(diff < 0.001) {
+        diff = 1.0;
+      }
+      _extremeCoordinates._coord[2*i] -= diff * _extremeCoordinatesMargin;
+      _extremeCoordinates._coord[2*i+1] += diff * _extremeCoordinatesMargin;
     }
-    result[2*i] -= diff * _extremeCoordinatesMargin;
-    result[2*i+1] += diff * _extremeCoordinatesMargin;
+    _extremeCoordinates._valid = true;
   }
-
-  if(useFrustumNearMin) {
-    if(result[5] > -_frustumNearMin) {
-      result[5] = -_frustumNearMin;
-    }
-  }
-
-  return true;
 }
 
-void Camera::updateExtremeCoordinates(bool useFrustumNearMin) {
-  ExtremeCoordinates newExt;
-  if(!getExtremeCoordinates(newExt, useFrustumNearMin)) {
+void Camera::setOptimalPositionForCamera() {
+  if(!_extremeCoordinates._valid) {
     return;
   }
 
-  if(!_extremeCoordinatesInitialized) {
-    _extremeCoordinates = newExt;
-    _extremeCoordinatesInitialized = true;
+  GlVector translVect;
+
+  // move back to see all objects
+  if(_extremeCoordinates._coord[5] > 0) {
+    translVect._z = -_extremeCoordinates._coord[5];
   }
-  else {
-    // Merge with all-time extreme coordinates
-    for(int i=0; i<3; ++i) {
-      if(newExt[2*i] < _extremeCoordinates[2*i]) {
-        _extremeCoordinates[2*i] = newExt[2*i];
-      }
-      if(newExt[2*i+1] > _extremeCoordinates[2*i+1]) {
-        _extremeCoordinates[2*i+1] = newExt[2*i+1];
-      }
-    }
-  }
+
+  // center in x and y ranges
+  double diff = _extremeCoordinates._coord[1] - _extremeCoordinates._coord[0];
+  translVect._x = -(_extremeCoordinates._coord[1] - diff / 2.0);
+  diff = _extremeCoordinates._coord[3] - _extremeCoordinates._coord[2];
+  translVect._y = -(_extremeCoordinates._coord[3] - diff / 2.0);
+
+  translateWorld(translVect); // with extreme coordinates
 }
 
-void Camera::setProjectionParameters() {
-  static int yy=0;
+void Camera::translateWorld(GlVector tv) {
+  std::cout << "translateWorld() vect: " << tv._x << ", " << tv._y << ", " << tv._z << "\n";
+
+  storeModelViewMatrixAndLoad1();
+  glTranslated(tv._x, tv._y, tv._z);
+  multiplyByStoredModelViewMatrix();
+
+  readExtremeCoordinates(); // do clculations on extr. coord. instead of iterating all objects
+}
+
+void Camera::calculateProjectionParameters() {
+  if(!_extremeCoordinates._valid) {
+    return;
+  }
 
   if(_projection == Projection::Orto) {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    double extrXY[2];
-    for(int i=0; i<2; ++i) {
-      extrXY[i] = std::max(std::abs(_extremeCoordinates[2*i]), std::abs(_extremeCoordinates[2*i+1]));
-    }
-
-    _projectionPlaneSize.first = extrXY[0] * 2;
-    _projectionPlaneSize.second = extrXY[1] * 2;
-    glOrtho(-extrXY[0], extrXY[0],
-            -extrXY[1], extrXY[1],
-            -_extremeCoordinates[5], -_extremeCoordinates[4]);
+    _ortoParams = getOrtoParamsToSeeAll();
+    std::cout << "orto params: " << _ortoParams.toString() << std::endl;
   }
   else {
-    double far = -_extremeCoordinates[4];
-    if(far < _frustumNear) {
-      far = _frustumNear + 1.0;
-    }
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    _projectionPlaneSize.first = -_frustumLeft * 2;
-    _projectionPlaneSize.second = -_frustumDown * 2;
-    glFrustum(_frustumLeft, -_frustumLeft,
-              _frustumDown, -_frustumDown,
-              _frustumNear, far);
-
-    if(yy++ % 100 == 0) {
-      std::cout << "_extremeCoordinates: [4]: " << _extremeCoordinates[4]
-                << ", [5]: " << _extremeCoordinates[5] << std::endl;
-      std::cout << "frustum: near: " << _frustumNear << ", far: " << far << std::endl;
-    }
+    _frustumParams = getFrustumParamsToSeeAllInFrontOfCamera();
+    std::cout << "frustum params: " << _frustumParams.toString() << std::endl;
   }
 }
 
-std::pair<double, double> Camera::getProjectionPlaneSize() const {
-  return _projectionPlaneSize;
-}
-
-double Camera::getGreatestCoordinateDifference() const {
-  double ret = 0.0;
-  for(int i=0; i<3; ++i) {
-    double d = _extremeCoordinates[2*i+1] - _extremeCoordinates[2*i];
-    if(d > ret) {
-      ret = d;
-    }
-  }
+Camera::ProjParams Camera::getOrtoParamsToSeeAll() {
+  ProjParams ret;
+  ret._left = _extremeCoordinates._coord[0];
+  ret._right = _extremeCoordinates._coord[1];
+  ret._bottom = _extremeCoordinates._coord[2];
+  ret._top = _extremeCoordinates._coord[3];
+  ret._far = -_extremeCoordinates._coord[4];
+  ret._near = -_extremeCoordinates._coord[5];
+  ret._valid = true;
   return ret;
 }
 
-void Camera::addToFrustumNear(double value) {
-  if(_projection != Projection::Frustum) {
-    return;
-  }
-
-  _frustumNear += value;
-  if(_frustumNear < _frustumNearMin) {
-    _frustumNear = _frustumNearMin;
-  }
-  _updateProjection = true;
-  _followAllObjects = false;
-}
-
-// TODO: merge with getExtremeCoordinates()
-void Camera::updateFrustumParameters() {
+Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
+  ProjParams ret;
   double aX = 0, aY = 0;
   bool someObjectsFound = false;
 
@@ -238,24 +192,38 @@ void Camera::updateFrustumParameters() {
       continue;
     }
 
+    // TODO: margins!
+
     // tp - position translated by model-view matrix
     // TODO: don't assume this matrix is identity
     const Vector tp = po->_position;
 
-    double radius = 0.0;
+    double radius = 1; // set small radius for objects with no radius
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const SphericalObject & so = static_cast<const SphericalObject &>(*po);
       radius = so._radius;
     }
+    double minusZMinusRadius = -tp.v[2] - radius;
+    double minusZPlusRadius = -tp.v[2] + radius;
 
-    if(tp.v[2] + radius > -_frustumNearMin) {
+    if(minusZMinusRadius < _frustumNearMin) {
       continue;
     }
 
-    someObjectsFound = true;
+    if(!someObjectsFound) {
+      ret._near = minusZMinusRadius;
+      ret._far = minusZPlusRadius;
+      someObjectsFound = true;
+    }
 
-    // TODO: margins
-    // TODO: div by zero checking
+    if(minusZMinusRadius < ret._near) {
+      ret._near = minusZMinusRadius;
+    }
+    if(minusZPlusRadius > ret._far) {
+      ret._far = minusZPlusRadius;
+    }
+
+    // div by zero won't occur
     double currAX = (std::abs(tp.v[0]) + radius) / std::abs(tp.v[2]);
     double currAY = (std::abs(tp.v[1]) + radius) / std::abs(tp.v[2]);
 
@@ -268,31 +236,84 @@ void Camera::updateFrustumParameters() {
   }
 
   if(someObjectsFound) {
-    double newFrustumLeft = aX * _extremeCoordinates[5];
-    double newFrustumDown = aY * _extremeCoordinates[5];
-    double newFrustumNear = -_extremeCoordinates[5];
-    if(!_frustumParemetersInitialized) {
-      _frustumLeft = newFrustumLeft;
-      _frustumDown = newFrustumDown;
-      _frustumNear = newFrustumNear;
-      _frustumParemetersInitialized = true;
+    // Frustum is always symmetrical.
+    ret._right = aX * ret._near;
+    ret._left = -ret._right;
+    ret._top = aY * ret._near;
+    ret._bottom = -ret._top;
+    ret._valid = true;
+  }
+
+  return ret;
+}
+
+void Camera::useProjectionParameters() {
+  if(_projection == Projection::Orto) {
+    if(!_ortoParams._valid) {
+      return;
     }
-    else {
-      if(newFrustumLeft < _frustumLeft) {
-        _frustumLeft = newFrustumLeft;
-      }
-      if(newFrustumDown < _frustumDown) {
-        _frustumDown = newFrustumDown;
-      }
-      if(newFrustumNear < _frustumNear) {
-        _frustumNear = newFrustumNear;
-      }
+
+    _projectionPlaneSize.first = _ortoParams._right - _ortoParams._left;
+    _projectionPlaneSize.second = _ortoParams._top - _ortoParams._bottom;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(_ortoParams._left, _ortoParams._right,
+            _ortoParams._bottom, _ortoParams._top,
+            _ortoParams._near, _ortoParams._far);
+  }
+  else {
+    if(!_frustumParams._valid) {
+      return;
     }
+
+    _projectionPlaneSize.first = _frustumParams._right - _frustumParams._left;
+    _projectionPlaneSize.second = _frustumParams._top - _frustumParams._bottom;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(_frustumParams._left, _frustumParams._right,
+            _frustumParams._bottom, _frustumParams._top,
+            _frustumParams._near, _frustumParams._far);
   }
 }
 
+std::pair<double, double> Camera::getProjectionPlaneSize() const {
+  return _projectionPlaneSize;
+}
+
+double Camera::getGreatestCoordinateDifference() const {
+  double ret = 0.0;
+  if(_extremeCoordinates._valid) {
+    for(int i=0; i<3; ++i) {
+      double d = _extremeCoordinates._coord[2*i+1] - _extremeCoordinates._coord[2*i];
+      if(d > ret) {
+        ret = d;
+      }
+    }
+  }
+  return ret;
+}
+
+void Camera::addToFrustumNear(double value) {
+  if(_projection != Projection::Frustum || !_frustumParams._valid) {
+    return;
+  }
+
+  _frustumParams._near += value;
+  if(_frustumParams._near < _frustumNearMin) {
+    _frustumParams._near = _frustumNearMin;
+  }
+  if(_frustumParams._near > _frustumParams._far) {
+    _frustumParams._far = _frustumParams._near + std::abs(value);
+  }
+
+  _updateGlProjection = true;
+  _followAllObjects = false;
+}
+
 void Camera::translate(Axis a, double factor) {
-  if(!_extremeCoordinatesInitialized) {
+  if(!_extremeCoordinates._valid) {
     return;
   }
 
@@ -301,15 +322,16 @@ void Camera::translate(Axis a, double factor) {
 
   switch(a) {
   case Axis::X:
-    diff = _extremeCoordinates[1] - _extremeCoordinates[0]; // TODO: some other reference value
+    // TODO: some other reference value
+    diff = _extremeCoordinates._coord[1] - _extremeCoordinates._coord[0];
     tx = diff * factor;
     break;
   case Axis::Y:
-    diff = _extremeCoordinates[3] - _extremeCoordinates[2];
+    diff = _extremeCoordinates._coord[3] - _extremeCoordinates._coord[2];
     ty = diff * factor;
     break;
   case Axis::Z:
-    diff = _extremeCoordinates[5] - _extremeCoordinates[4];
+    diff = _extremeCoordinates._coord[5] - _extremeCoordinates._coord[4];
     tz = diff * factor;
     break;
   }
@@ -322,10 +344,6 @@ void Camera::translate(Axis a, double factor) {
 }
 
 void Camera::rotate(Axis a, double angleDeg) {
-  if(!_extremeCoordinatesInitialized) {
-    return;
-  }
-
   double rx = 0, ry = 0, rz = 0;
 
   switch(a) {
@@ -349,10 +367,10 @@ void Camera::rotate(Axis a, double angleDeg) {
 
 void Camera::storeModelViewMatrixAndLoad1() {
   glMatrixMode(GL_MODELVIEW);
-  glGetDoublev(GL_MODELVIEW_MATRIX, storedModelViewMatrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX, _storedModelViewMatrix);
   glLoadIdentity();
 }
 
 void Camera::multiplyByStoredModelViewMatrix() {
-  glMultMatrixd(storedModelViewMatrix);
+  glMultMatrixd(_storedModelViewMatrix);
 }

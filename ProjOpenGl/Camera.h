@@ -3,6 +3,7 @@
 
 #include <array>
 #include <utility>
+#include <sstream>
 #include "Universe.h"
 
 class Camera {
@@ -32,31 +33,59 @@ public:
   double getGreatestCoordinateDifference() const;
 
 private:
-  typedef std::array<double, 6> ExtremeCoordinates; // xl, xr, yb, yt, zf, zn
+  struct ExtremeCoordinates {
+    ExtremeCoordinates() { _valid = false; _coord.fill(0); }
+    bool _valid;
+    std::array<double, 6> _coord; // xl, xr, yb, yt, zf, zn
+  };
 
-  // returns: "visible" object found
-  bool getExtremeCoordinates(ExtremeCoordinates & result, bool useFrustumNearMin);
-  void updateExtremeCoordinates(bool useFrustumNearMin);
-  void updateFrustumParameters();
-  void setProjectionParameters();
+  struct ProjParams {
+    ProjParams() { _valid = false; _left = _right = _bottom = _top = _near = _far = 0; }
+    std::string toString() {
+      if(_valid) {
+        std::stringstream buf;
+        buf << "(l " << _left << ", r " << _right << ", b " << _bottom
+            << ", t " << _top << ", n " << _near << ", f " << _far << ")";
+        return buf.str();
+      }
+      return "invalid";
+    }
+    bool _valid;
+    double _left, _right;
+    double _bottom, _top;
+    double _near, _far;
+  };
+
+  struct GlVector {
+    GlVector() { _x = _y = _z = 0; }
+    double _x, _y, _z;
+  };
+
+  void readExtremeCoordinates();
+  void setOptimalPositionForCamera(); // may interact with proj parameters
+  void calculateProjectionParameters();
+  void useProjectionParameters();
   void storeModelViewMatrixAndLoad1();
   void multiplyByStoredModelViewMatrix();
+  bool projectionParametersValid();
+  ProjParams getOrtoParamsToSeeAll();
+  ProjParams getFrustumParamsToSeeAllInFrontOfCamera();
+  void translateWorld(GlVector tv);
 
   static constexpr double _extremeCoordinatesMargin = 0.05; // fraction of extreme coordinate
   static constexpr double _frustumNearMin = 0.001;
 
   bool _followAllObjects;
   Projection _projection;
-  bool _updateProjection;
+  bool _updateGlProjection;
+
   ExtremeCoordinates _extremeCoordinates;
-  bool _extremeCoordinatesInitialized;
-  double _frustumNear;
-  double _frustumLeft;
-  double _frustumDown;
-  bool _frustumParemetersInitialized;
+  ProjParams _ortoParams;
+  ProjParams _frustumParams;
+
   const PhysicalObjectsContainer * _currObjects;
   std::pair<double, double> _projectionPlaneSize;
-  double storedModelViewMatrix[16];
+  double _storedModelViewMatrix[16];
 };
 
 #endif /* PROJOPENGL_CAMERA_H_ */
