@@ -2,6 +2,7 @@
 #include <cmath>
 
 void drawFilledCircle(double centerX, double centerY, double centerZ, double radius, int parts) {
+  glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glTranslated(centerX, centerY, centerZ);
 
@@ -22,6 +23,7 @@ void drawFilledCircle(double centerX, double centerY, double centerZ, double rad
 }
 
 void drawCircle(double centerX, double centerY, double radius, int parts) {
+  glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glTranslated(centerX, centerY, 0);
 
