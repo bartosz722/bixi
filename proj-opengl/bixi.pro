@@ -7,7 +7,7 @@ TARGET = bixi
 INCLUDEPATH += . ../PhysicalObjects ../Utilities ../Universe ../UtilitiesGl
 CONFIG -= qt
 CONFIG += c++11
-QMAKE_CXXFLAGS += -pthread
+QMAKE_CXXFLAGS += -pthread -g
 LIBS += -pthread -lGL -lglut -lGLU
 
 # Input
