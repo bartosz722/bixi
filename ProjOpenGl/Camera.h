@@ -57,11 +57,6 @@ private:
     double _near, _far;
   };
 
-  struct GlVector {
-    GlVector() { _x = _y = _z = 0; }
-    double _x, _y, _z;
-  };
-
   void readExtremeCoordinates();
   void setOptimalPositionForCamera();
   void calculateProjectionParameters();
@@ -71,7 +66,7 @@ private:
   bool projectionParametersValid();
   ProjParams getOrtoParamsToSeeAll();
   ProjParams getFrustumParamsToSeeAllInFrontOfCamera();
-  void translateWorld(GlVector tv);
+  void translateWorld(const glm::dvec3 & tv);
   void loadModelViewMatrixToCache();
   glm::dvec4 cachedModelViewMatrix_Mul_Vector(const Vector & v);
 

@@ -131,27 +131,27 @@ void Camera::setOptimalPositionForCamera() {
     return;
   }
 
-  GlVector translVect; // TOOD: użyć typu z glm
+  glm::dvec3 translVect(0);
 
   // move back to see all objects
   if(_extremeCoordinates._coord[5] > 0) {
-    translVect._z = -_extremeCoordinates._coord[5];
+    translVect.z = -_extremeCoordinates._coord[5];
   }
 
   // center in x and y ranges
   double diff = _extremeCoordinates._coord[1] - _extremeCoordinates._coord[0];
-  translVect._x = -(_extremeCoordinates._coord[1] - diff / 2.0);
+  translVect.x = -(_extremeCoordinates._coord[1] - diff / 2.0);
   diff = _extremeCoordinates._coord[3] - _extremeCoordinates._coord[2];
-  translVect._y = -(_extremeCoordinates._coord[3] - diff / 2.0);
+  translVect.y = -(_extremeCoordinates._coord[3] - diff / 2.0);
 
   translateWorld(translVect); // with extreme coordinates
 }
 
-void Camera::translateWorld(GlVector tv) {
+void Camera::translateWorld(const glm::dvec3 & tv) {
 //  std::cout << "translateWorld() vect: " << tv._x << ", " << tv._y << ", " << tv._z << "\n";
 
   storeModelViewMatrixAndLoad1();
-  glTranslated(tv._x, tv._y, tv._z);
+  glTranslated(tv.x, tv.y, tv.z);
   multiplyByStoredModelViewMatrix();
 
   readExtremeCoordinates(); // do clculations on extr. coord. instead of iterating all objects
