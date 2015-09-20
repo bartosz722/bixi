@@ -17,12 +17,6 @@ Camera::Camera()
 
 void Camera::setFollowAllObjects(bool f) {
   _followAllObjects = f;
-
-  if(_followAllObjects) {
-    // temporary actions
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-  }
 }
 
 void Camera::setProjection(Projection p) {
@@ -31,7 +25,6 @@ void Camera::setProjection(Projection p) {
   _extremeCoordinates._valid = false;
   _ortoParams._valid = false;
   _frustumParams._valid = false;
-  // FIXME: nie chce kamera pokazać wszystkiego po zmianie rzutowania
 }
 
 // jesli orto to:
@@ -320,26 +313,18 @@ void Camera::addToFrustumNear(double value) {
 }
 
 void Camera::translate(Axis a, double factor) {
-  if(!_extremeCoordinates._valid) {
-    return;
-  }
-
   double tx = 0, ty = 0, tz = 0;
-  double diff = 0;
+  const double refValue = (_projectionPlaneSize.first + _projectionPlaneSize.second) / 2;
 
   switch(a) {
   case Axis::X:
-    // TODO: some other reference value
-    diff = _extremeCoordinates._coord[1] - _extremeCoordinates._coord[0];
-    tx = diff * factor;
+    tx = refValue * factor;
     break;
   case Axis::Y:
-    diff = _extremeCoordinates._coord[3] - _extremeCoordinates._coord[2];
-    ty = diff * factor;
+    ty = refValue * factor;
     break;
   case Axis::Z:
-    diff = _extremeCoordinates._coord[5] - _extremeCoordinates._coord[4];
-    tz = diff * factor;
+    tz = refValue * factor;
     break;
   }
 
@@ -350,6 +335,7 @@ void Camera::translate(Axis a, double factor) {
   multiplyByStoredModelViewMatrix();
 
   _followAllObjects = false;
+  _extremeCoordinates._valid = false;
 }
 
 void Camera::rotate(Axis a, double angleDeg) {
@@ -372,6 +358,7 @@ void Camera::rotate(Axis a, double angleDeg) {
   multiplyByStoredModelViewMatrix();
 
   _followAllObjects = false;
+  _extremeCoordinates._valid = false;
 }
 
 void Camera::storeModelViewMatrixAndLoad1() {
