@@ -315,9 +315,14 @@ double Camera::getGreatestCoordinateDifference() const {
   return ret;
 }
 
-void Camera::addToFrustumNear(double value) {
-  if(_projection != Projection::Frustum || !_frustumParams._valid) {
+void Camera::addToFrustumNear(double factor) {
+  if(_projection != Projection::Frustum || !_frustumParams._valid || !_extremeCoordinates._valid) {
     return;
+  }
+
+  double value = (_extremeCoordinates._coord[4] - _extremeCoordinates._coord[5]) * factor;
+  if(fabs(value) < 1.0) {
+    value = factor > 0.0 ? 1.0 : -1.0;
   }
 
   _frustumParams._near += value;
@@ -328,7 +333,7 @@ void Camera::addToFrustumNear(double value) {
     _frustumParams._far = _frustumParams._near + std::abs(value);
   }
 
-  std::cout << "addToFrustumNear(): near " << _frustumParams._near
+  std::cout << "addToFrustumNear(): value " << value << ", near " << _frustumParams._near
       << ", far " << _frustumParams._far << std::endl;
 
   _updateGlProjection = true;
@@ -358,7 +363,7 @@ void Camera::translate(Axis a, double factor) {
   multiplyByStoredModelViewMatrix();
 
   _followAllObjects = false;
-  _extremeCoordinates._valid = false;
+  readExtremeCoordinates(); // TODO: do clculations on extr. coord. instead of iterating all objects
 }
 
 void Camera::rotate(Axis a, double angleDeg) {
@@ -381,7 +386,7 @@ void Camera::rotate(Axis a, double angleDeg) {
   multiplyByStoredModelViewMatrix();
 
   _followAllObjects = false;
-  _extremeCoordinates._valid = false;
+  readExtremeCoordinates(); // TODO: do clculations on extr. coord. instead of iterating all objects
 }
 
 void Camera::storeModelViewMatrixAndLoad1() {

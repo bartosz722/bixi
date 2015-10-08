@@ -63,10 +63,10 @@ void handleKeyPressed(unsigned char key, int x, int y) {
 
   // zoom
   case 'x': // zoom in
-    camera.addToFrustumNear(0.3);
+    camera.addToFrustumNear(-0.01);
     break;
   case 'z': // zoom out
-    camera.addToFrustumNear(-0.3);
+    camera.addToFrustumNear(0.01);
     break;
 
   default:
