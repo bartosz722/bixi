@@ -90,7 +90,7 @@ void setupOpenGL(int & argc, char **argv) {
   glutReshapeFunc(reshape);
   glutKeyboardFunc(handleKeyPressed);
 
-  camera.setProjection(Camera::Projection::Orto);
+  camera.setProjection(Camera::Projection::Frustum);
   camera.setFollowAllObjects(true);
 }
 
@@ -114,7 +114,7 @@ void paint() {
   camera.updateView(snapshot);
   setViewport();
 
-  glClearColor(1, 1, 1, 1);
+  glClearColor(0, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT);
 
   glColor3f(1.0, 0.0, 0.0);
@@ -164,9 +164,9 @@ void readUniverse(int) {
   tracker.pushData(snapshot._objects);
 
   if(readUniverseCallCount % printPhysObjectsPeriod == 0 || !doPaintPhysicalObejcts) {
-    cout << "current tick: " << snapshot._currentTick << endl;
-    printPhysicalObjects(snapshot._objects);
-    cout << "size of longest track: " << tracker.getSizeOfLongestTrack() << endl;
+//    cout << "current tick: " << snapshot._currentTick << endl;
+//    printPhysicalObjects(snapshot._objects);
+//    cout << "size of longest track: " << tracker.getSizeOfLongestTrack() << endl;
 
     if(precisionTestMode) {
       printPrecisionTestResult();
@@ -191,7 +191,7 @@ void paintPhysicalObjects() {
     const Vector & pos = po->_position;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const double radius = static_cast<const SphericalObject &>(*po)._radius;
-      drawFilledCircle(pos.v[0], pos.v[1], pos.v[2], radius, 30);
+      drawGlutSphere(pos.v[0], pos.v[1], pos.v[2], radius, 20, 20, false);
     }
     else {
       glLineWidth(lineWidthPix);
