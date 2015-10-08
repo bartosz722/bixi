@@ -40,7 +40,7 @@ void Camera::updateView(const Universe::Snapshot & s) {
 
   if(_followAllObjects || !projectionParametersValid()) {
     readExtremeCoordinates();
-    setOptimalPositionForCamera(); // may interact with proj parameters
+    setOptimalPositionForCamera(); // may use current projection parameters
     calculateProjectionParameters();
     _updateGlProjection = true;
   }
@@ -106,6 +106,7 @@ void Camera::readExtremeCoordinates() {
     _extremeCoordinates._coord.fill(0);
   }
   else {
+    // TODO: move margin calculation to calculateProjectionParameters()
     // Add margin for found extreme coordinates
     for(int i=0; i<3; ++i) {
       double diff = _extremeCoordinates._coord[2*i+1] - _extremeCoordinates._coord[2*i];
@@ -147,7 +148,7 @@ void Camera::translateWorld(const glm::dvec3 & tv) {
   glTranslated(tv.x, tv.y, tv.z);
   multiplyByStoredModelViewMatrix();
 
-  readExtremeCoordinates(); // do clculations on extr. coord. instead of iterating all objects
+  readExtremeCoordinates(); // TODO: do clculations on extr. coord. instead of iterating all objects
 }
 
 void Camera::calculateProjectionParameters() {
@@ -166,6 +167,8 @@ void Camera::calculateProjectionParameters() {
 }
 
 Camera::ProjParams Camera::getOrtoParamsToSeeAll() {
+  // TODO: add adding margins here after moving it away from readExtremeCoordinates()
+
   ProjParams ret;
   ret._left = _extremeCoordinates._coord[0];
   ret._right = _extremeCoordinates._coord[1];
@@ -179,8 +182,9 @@ Camera::ProjParams Camera::getOrtoParamsToSeeAll() {
 
 Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
   ProjParams ret;
-  double aX = 0, aY = 0;
   bool someObjectsFound = false;
+  double maxGammaX = 0;
+  double maxGammaY = 0;
 
   loadModelViewMatrixToCache();
 
@@ -189,17 +193,15 @@ Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
       continue;
     }
 
-    // TODO: margins!
-
     const auto tp = cachedModelViewMatrix_Mul_Vector(po->_position);
 
-    double radius = 1; // set small radius for objects with no radius
+    double radius = 0;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const SphericalObject & so = static_cast<const SphericalObject &>(*po);
       radius = so._radius;
     }
-    double minusZMinusRadius = -tp[2] - radius;
-    double minusZPlusRadius = -tp[2] + radius;
+    double minusZMinusRadius = -tp.z - radius;
+    double minusZPlusRadius = -tp.z + radius;
 
     if(minusZMinusRadius < _frustumNearMin) {
       continue;
@@ -218,20 +220,41 @@ Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
       ret._far = minusZPlusRadius;
     }
 
-    // div by zero won't occur
-    double currAX = (std::abs(tp[0]) + radius) / std::abs(tp[2]);
-    double currAY = (std::abs(tp[1]) + radius) / std::abs(tp[2]);
+    // length of position vector projected on XZ or YZ plane
+    double kx = sqrt(pow(tp.x, 2) + pow(tp.z, 2));
+    double ky = sqrt(pow(tp.y, 2) + pow(tp.z, 2));
 
-    if(currAX > aX) {
-      aX = currAX;
+    // angle between position vector and Z axis
+    double alphaX = atan(tp.x / -tp.z);
+    double alphaY = atan(tp.y / -tp.z);
+
+    // angle between position vector and sphere's tangent line
+    double betaX = asin(radius / kx);
+    double betaY = asin(radius / ky);
+
+    // angle between sphere's tangent line and Z axis
+    double gammaX = std::max(fabs(alphaX + betaX), fabs(alphaX - betaX));
+    double gammaY = std::max(fabs(alphaY + betaY), fabs(alphaY - betaY));
+
+//    std::cout << "kx: " << kx << ", alphaX: " << alphaX << ", betaX: " << betaX
+//        << ", gammaX: " << gammaX
+//        << ", abs+: " << fabs(alphaX + betaX) << ", abs-: " << fabs(alphaX - betaX)
+//        << std::endl;
+
+    if(gammaX > maxGammaX) {
+      maxGammaX = gammaX;
     }
-    if(currAY > aY) {
-      aY = currAY;
+    if(gammaY > maxGammaY) {
+      maxGammaY = gammaY;
     }
+
+    // TODO: margins!
   }
 
   if(someObjectsFound) {
     // Frustum is always symmetrical.
+    double aX = tan(maxGammaX);
+    double aY = tan(maxGammaY);
     ret._right = aX * ret._near;
     ret._left = -ret._right;
     ret._top = aY * ret._near;
