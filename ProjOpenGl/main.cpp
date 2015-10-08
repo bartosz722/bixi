@@ -6,11 +6,14 @@ const int windowWidth = 800;
 const int windowHeight = 800;
 const int repaintPeriodMs = 20;
 const int printPhysObjectsPeriod = 50 * 3; // unit: one readUniverse() call
-const double physicalObjectSize = 0.02; // fraction of something
-const int lineWidthPix = 3;
-const int lineWidthTrack = 1;
 const size_t trackLength = 1000;
 const size_t trackDensity = 2;
+
+const double physicalObjectSize = 0.02; // fraction of something
+const int lineWidthPhysObj = 3;
+const int lineWidthSpherObj = 2;
+const int lineWidthTrack = 1;
+const int lineWidthViewportBorder = 2;
 
 const Color defaultColors[] = {
   { 0, 0, 255 },
@@ -30,8 +33,6 @@ map<int, PhysObjData> objData;
 
 bool precisionTestMode = false;
 bool doPaintPhysicalObejcts = true;
-double firstViewBorder = -1;
-double currentViewBorder = 0.0;
 size_t readUniverseCallCount = 0;
 
 int main(int argc, char **argv) {
@@ -117,21 +118,9 @@ void paint() {
   glClearColor(0, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT);
 
-  glColor3f(1.0, 0.0, 0.0);
-  glLineWidth(lineWidthPix);
-  glBegin(GL_LINES);
-  glVertex3f(-firstViewBorder, -firstViewBorder, 0);
-  glVertex3f(firstViewBorder, -firstViewBorder, 0);
-  glVertex3f(firstViewBorder, -firstViewBorder, 0);
-  glVertex3f(firstViewBorder, firstViewBorder, 0);
-  glVertex3f(firstViewBorder, firstViewBorder, 0);
-  glVertex3f(-firstViewBorder, firstViewBorder, 0);
-  glVertex3f(-firstViewBorder, firstViewBorder, 0);
-  glVertex3f(-firstViewBorder, -firstViewBorder, 0);
-  glEnd();
-
   paintPhysicalObjects();
   paintTracks();
+  paintBorderAroundViewport();
 
   glFlush();
   glutSwapBuffers();
@@ -191,10 +180,11 @@ void paintPhysicalObjects() {
     const Vector & pos = po->_position;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const double radius = static_cast<const SphericalObject &>(*po)._radius;
+      glLineWidth(lineWidthSpherObj);
       drawGlutSphere(pos.v[0], pos.v[1], pos.v[2], radius, 20, 20, false);
     }
     else {
-      glLineWidth(lineWidthPix);
+      glLineWidth(lineWidthPhysObj);
       glBegin(GL_LINES);
       glVertex3f(pos.v[0] - physObjDrawSize, pos.v[1] + physObjDrawSize, pos.v[2]);
       glVertex3f(pos.v[0] + physObjDrawSize, pos.v[1] - physObjDrawSize, pos.v[2]);
@@ -220,6 +210,31 @@ void paintTracks() {
 
     glEnd();
   }
+}
+
+void paintBorderAroundViewport() {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(-1, 1, -1, 1, -1, 1);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glColor3f(1.0, 0.0, 0.0);
+    glLineWidth(lineWidthViewportBorder);
+    glBegin(GL_LINE_LOOP);
+    glVertex3d(-1, -1, 0);
+    glVertex3d(-1, 1, 0);
+    glVertex3d(1, 1, 0);
+    glVertex3d(1, -1, 0);
+    glEnd();
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 }
 
 void setupLocalPhysicalObjectData() {
