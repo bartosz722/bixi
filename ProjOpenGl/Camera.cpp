@@ -341,29 +341,25 @@ void Camera::addToFrustumNear(double factor) {
 }
 
 void Camera::translate(Axis a, double factor) {
-  double tx = 0, ty = 0, tz = 0;
+  glm::dvec3 tv(0);
   const double refValue = (_projectionPlaneSize.first + _projectionPlaneSize.second) / 2;
 
   switch(a) {
   case Axis::X:
-    tx = refValue * factor;
+    tv.x = refValue * factor;
     break;
   case Axis::Y:
-    ty = refValue * factor;
+    tv.y = refValue * factor;
     break;
   case Axis::Z:
-    tz = refValue * factor;
+    tv.z = refValue * factor;
     break;
   }
 
-  std::cout << "translate(): " << tx << ", " << ty << ", " << tz << std::endl;
+  std::cout << "translate(): " << tv.x << ", " << tv.y << ", " << tv.z << std::endl;
 
-  storeModelViewMatrixAndLoad1();
-  glTranslated(tx, ty, tz);
-  multiplyByStoredModelViewMatrix();
-
+  translateWorld(tv);
   _followAllObjects = false;
-  readExtremeCoordinates(); // TODO: do clculations on extr. coord. instead of iterating all objects
 }
 
 void Camera::rotate(Axis a, double angleDeg) {
