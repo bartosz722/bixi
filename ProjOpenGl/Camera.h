@@ -68,6 +68,7 @@ private:
   ProjParams getOrtoParamsToSeeAll();
   ProjParams getFrustumParamsToSeeAllInFrontOfCamera();
   void translateWorld(const glm::dvec3 & tv);
+  void rotateWorld(double angleDeg, const glm::dvec3 & rv);
   void loadModelViewMatrixToCache();
   glm::dvec4 cachedModelViewMatrix_Mul_Vector(const Vector & v);
 

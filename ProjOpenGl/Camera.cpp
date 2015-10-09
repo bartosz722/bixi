@@ -151,6 +151,14 @@ void Camera::translateWorld(const glm::dvec3 & tv) {
   readExtremeCoordinates(); // TODO: do clculations on extr. coord. instead of iterating all objects
 }
 
+void Camera::rotateWorld(double angleDeg, const glm::dvec3 & rv) {
+  storeModelViewMatrixAndLoad1();
+  glRotated(angleDeg, rv.x, rv.y, rv.z);
+  multiplyByStoredModelViewMatrix();
+
+  readExtremeCoordinates(); // TODO: do clculations on extr. coord. instead of iterating all objects
+}
+
 void Camera::calculateProjectionParameters() {
   if(!_extremeCoordinates._valid) {
     return;
@@ -385,26 +393,23 @@ void Camera::translate(Axis a, double factor) {
 }
 
 void Camera::rotate(Axis a, double angleDeg) {
-  double rx = 0, ry = 0, rz = 0;
+  glm::dvec3 rv(0);
 
   switch(a) {
   case Axis::X:
-    rx = 1;
+    rv.x = 1;
     break;
   case Axis::Y:
-    ry = 1;
+    rv.y = 1;
     break;
   case Axis::Z:
-    rz = 1;
+    rv.z = 1;
     break;
   }
 
-  storeModelViewMatrixAndLoad1();
-  glRotated(angleDeg, rx, ry, rz);
-  multiplyByStoredModelViewMatrix();
-
+  rotateWorld(angleDeg, rv);
   _followAllObjects = false;
-  readExtremeCoordinates(); // TODO: do clculations on extr. coord. instead of iterating all objects
+
 }
 
 void Camera::storeModelViewMatrixAndLoad1() {
