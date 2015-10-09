@@ -27,7 +27,8 @@ public:
   void setProjection(Projection p);
   Projection getProjection() const { return _projection; }
 
-  void addToFrustumNear(double factor);
+  void changeFrustumNear(double factor);
+  void changeFrustumFar(double factor);
   void updateView(const Universe::Snapshot & s);
 
   std::pair<double, double> getProjectionPlaneSize() const;

@@ -61,12 +61,18 @@ void handleKeyPressed(unsigned char key, int x, int y) {
     camera.rotate(Camera::Axis::Z, 10);
     break;
 
-  // zoom
+  // frustum parameters
   case 'x': // zoom in
-    camera.addToFrustumNear(-0.01);
+    camera.changeFrustumNear(-0.01);
     break;
   case 'z': // zoom out
-    camera.addToFrustumNear(0.01);
+    camera.changeFrustumNear(0.01);
+    break;
+  case 'v':
+    camera.changeFrustumFar(-0.01);
+    break;
+  case 'c':
+    camera.changeFrustumFar(0.01);
     break;
 
   default:

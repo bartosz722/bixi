@@ -315,7 +315,7 @@ double Camera::getGreatestCoordinateDifference() const {
   return ret;
 }
 
-void Camera::addToFrustumNear(double factor) {
+void Camera::changeFrustumNear(double factor) {
   if(_projection != Projection::Frustum || !_frustumParams._valid || !_extremeCoordinates._valid) {
     return;
   }
@@ -329,11 +329,33 @@ void Camera::addToFrustumNear(double factor) {
   if(_frustumParams._near < _frustumNearMin) {
     _frustumParams._near = _frustumNearMin;
   }
-  if(_frustumParams._near > _frustumParams._far) {
+  if(_frustumParams._near >= _frustumParams._far) {
     _frustumParams._far = _frustumParams._near + std::abs(value);
   }
 
-  std::cout << "addToFrustumNear(): value " << value << ", near " << _frustumParams._near
+  std::cout << "changeFrustumNear(): value " << value << ", near " << _frustumParams._near
+      << ", far " << _frustumParams._far << std::endl;
+
+  _updateGlProjection = true;
+  _followAllObjects = false;
+}
+
+void Camera::changeFrustumFar(double factor) {
+  if(_projection != Projection::Frustum || !_frustumParams._valid || !_extremeCoordinates._valid) {
+    return;
+  }
+
+  double value = (_extremeCoordinates._coord[4] - _extremeCoordinates._coord[5]) * factor;
+  if(fabs(value) < 1.0) {
+    value = factor > 0.0 ? 1.0 : -1.0;
+  }
+
+  _frustumParams._far += value;
+  if(_frustumParams._far <= _frustumParams._near) {
+    _frustumParams._far = _frustumParams._near + 1;
+  }
+
+  std::cout << "changeFrustumFar(): value " << value << ", near " << _frustumParams._near
       << ", far " << _frustumParams._far << std::endl;
 
   _updateGlProjection = true;
