@@ -69,10 +69,10 @@ void handleKeyPressed(unsigned char key, int x, int y) {
     camera.changeFrustumNear(0.01);
     break;
   case 'v':
-    camera.changeFrustumFar(-0.01);
+    camera.changeFrustumFar(-0.2);
     break;
   case 'c':
-    camera.changeFrustumFar(0.01);
+    camera.changeFrustumFar(0.2);
     break;
 
   default:
