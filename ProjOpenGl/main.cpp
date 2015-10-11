@@ -17,7 +17,7 @@ const int lineWidthViewportBorder = 2;
 
 const Color defaultColors[] = {
   { 0, 0, 255 },
-  { 0, 255, 0 },
+  { 0, 0, 0 },
   { 255, 0, 0 },
 };
 
@@ -222,7 +222,7 @@ void paintBorderAroundViewport() {
     glPushMatrix();
     glLoadIdentity();
 
-    glColor3f(1.0, 0.0, 0.0);
+    glColor3ub(193, 86, 255);
     glLineWidth(lineWidthViewportBorder);
     glBegin(GL_LINE_LOOP);
     glVertex3d(-1, -1, 0);
