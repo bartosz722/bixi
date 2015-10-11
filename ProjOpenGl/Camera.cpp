@@ -23,6 +23,7 @@ void Camera::setFollowAllObjects(bool f) {
 
 void Camera::setProjection(Projection p) {
   _projection = p;
+  _followAllObjects = true;
   _updateGlProjection = true;
   _extremeCoordinates._valid = false;
   _ortoParams._valid = false;
