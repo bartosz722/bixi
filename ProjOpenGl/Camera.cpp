@@ -127,10 +127,10 @@ void Camera::setOptimalPositionForCamera() {
 
   glm::dvec3 translVect(0);
 
-  // move back to see all objects
-  if(_extremeCoordinates._coord[5] > 0) {
-    translVect.z = -_extremeCoordinates._coord[5];
-  }
+  // Move camera backward to see all objects or move forward to get closer.
+  double zMargin = (_extremeCoordinates._coord[5] - _extremeCoordinates._coord[4])
+                   * _optimalCameraZPositionFactor;
+  translVect.z = -(_extremeCoordinates._coord[5] + zMargin);
 
   // center in x and y ranges
   double diff = _extremeCoordinates._coord[1] - _extremeCoordinates._coord[0];
@@ -138,11 +138,11 @@ void Camera::setOptimalPositionForCamera() {
   diff = _extremeCoordinates._coord[3] - _extremeCoordinates._coord[2];
   translVect.y = -(_extremeCoordinates._coord[3] - diff / 2.0);
 
-  translateWorld(translVect); // with extreme coordinates
+  translateWorld(translVect);
 }
 
 void Camera::translateWorld(const glm::dvec3 & tv) {
-//  std::cout << "translateWorld() vect: " << tv._x << ", " << tv._y << ", " << tv._z << "\n";
+//  std::cout << "translateWorld() vect: " << tv.x << ", " << tv.y << ", " << tv.z << "\n";
 
   storeModelViewMatrixAndLoad1();
   glTranslated(tv.x, tv.y, tv.z);

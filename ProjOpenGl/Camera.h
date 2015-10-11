@@ -38,7 +38,7 @@ private:
   struct ExtremeCoordinates {
     ExtremeCoordinates() { _valid = false; _coord.fill(0); }
     bool _valid;
-    std::array<double, 6> _coord; // xl, xr, yb, yt, zf, zn
+    std::array<double, 6> _coord; // { xl, xr, yb, yt, zf, zn }; zn >= zf
   };
 
   struct ProjParams {
@@ -74,6 +74,7 @@ private:
 
   static constexpr double _extremeCoordinatesMargin = 0.05; // fraction of extreme coordinate
   static constexpr double _frustumNearMin = 0.001;
+  static constexpr double _optimalCameraZPositionFactor = 1.0;
 
   bool _followAllObjects;
   Projection _projection;
