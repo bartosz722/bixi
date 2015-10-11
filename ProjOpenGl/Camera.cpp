@@ -17,6 +17,8 @@ Camera::Camera()
 
 void Camera::setFollowAllObjects(bool f) {
   _followAllObjects = f;
+  _ortoParams._valid = false;
+  _frustumParams._valid = false;
 }
 
 void Camera::setProjection(Projection p) {
@@ -27,20 +29,12 @@ void Camera::setProjection(Projection p) {
   _frustumParams._valid = false;
 }
 
-// jesli orto to:
-// - cofaj kamere jeśli obiekt zbliżył się do kamery - nie trzeba w tym rzutowaniu
-// - centruj kamere tylko jeśli poszerzane jest również pole widzenia
-
-// jeśli frustum to:
-// - cofaj kamere jeśli obiekt zbliżył się do kamery, parametry frustum są resetowane wtedy
-// - centrum się nie zmienia, pole widzenia może być tylko poszerzane i tylko symetrycznie
-
 void Camera::updateView(const Universe::Snapshot & s) {
   _currObjects = &s._objects;
 
   if(_followAllObjects || !projectionParametersValid()) {
     readExtremeCoordinates();
-    setOptimalPositionForCamera(); // may use current projection parameters
+    setOptimalPositionForCamera();
     calculateProjectionParameters();
     _updateGlProjection = true;
   }
@@ -62,7 +56,6 @@ bool Camera::projectionParametersValid() {
 }
 
 void Camera::readExtremeCoordinates() {
-  _extremeCoordinates._valid = false;
   bool someObjectsFound = false;
 
   loadModelViewMatrixToCache();
@@ -102,21 +95,12 @@ void Camera::readExtremeCoordinates() {
     }
   }
 
-  if(!someObjectsFound) {
-    _extremeCoordinates._coord.fill(0);
+  if(someObjectsFound) {
+    _extremeCoordinates._valid = true;
   }
   else {
-    // TODO: move margin calculation to calculateProjectionParameters()
-    // Add margin for found extreme coordinates
-    for(int i=0; i<3; ++i) {
-      double diff = _extremeCoordinates._coord[2*i+1] - _extremeCoordinates._coord[2*i];
-      if(diff < 0.001) {
-        diff = 1.0;
-      }
-      _extremeCoordinates._coord[2*i] -= diff * _extremeCoordinatesMargin;
-      _extremeCoordinates._coord[2*i+1] += diff * _extremeCoordinatesMargin;
-    }
-    _extremeCoordinates._valid = true;
+    _extremeCoordinates._valid = false;
+    _extremeCoordinates._coord.fill(0);
   }
 }
 
@@ -131,6 +115,14 @@ void Camera::setOptimalPositionForCamera() {
   double zMargin = (_extremeCoordinates._coord[5] - _extremeCoordinates._coord[4])
                    * _optimalCameraZPositionFactor;
   translVect.z = -(_extremeCoordinates._coord[5] + zMargin);
+
+  if(projectionParametersValid()) {
+    // When proj parameters are valid only moving camera back is allowed.
+    if(translVect.z < 0.0) {
+      translateWorld(translVect);
+    }
+    return;
+  }
 
   // center in x and y ranges
   double diff = _extremeCoordinates._coord[1] - _extremeCoordinates._coord[0];
@@ -165,18 +157,59 @@ void Camera::calculateProjectionParameters() {
   }
 
   if(_projection == Projection::Orto) {
-    _ortoParams = getOrtoParamsToSeeAll();
-//    std::cout << "orto params: " << _ortoParams.toString() << std::endl;
+    auto newParams = getOrtoParamsToSeeAll();
+    if(!_ortoParams._valid) {
+      _ortoParams = newParams;
+    }
+    else if(_followAllObjects) {
+      if(newParams._right > _ortoParams._right) {
+        _ortoParams._right = newParams._right;
+      }
+      if(newParams._left < _ortoParams._left) {
+        _ortoParams._left = newParams._left;
+      }
+      if(newParams._top > _ortoParams._top) {
+        _ortoParams._top = newParams._top;
+      }
+      if(newParams._bottom < _ortoParams._bottom) {
+        _ortoParams._bottom = newParams._bottom;
+      }
+      if(newParams._far > _ortoParams._far) {
+        _ortoParams._far = newParams._far;
+      }
+      if(newParams._near < _ortoParams._near) {
+        _ortoParams._near = newParams._near;
+      }
+    }
+
   }
   else {
-    _frustumParams = getFrustumParamsToSeeAllInFrontOfCamera();
-//    std::cout << "frustum params: " << _frustumParams.toString() << std::endl;
+    auto newParams = getFrustumParamsToSeeAllInFrontOfCamera();
+    if(!_frustumParams._valid) {
+      _frustumParams = newParams;
+    }
+    else if(_followAllObjects) {
+      // Frustum is always symmetrical.
+      double currAngleX = atan(_frustumParams._right / _frustumParams._near);
+      double currAngleY = atan(_frustumParams._top / _frustumParams._near);
+      double newAngleX = atan(newParams._right / newParams._near);
+      double newAngleY = atan(newParams._top / newParams._near);
+      double nextAngleX = std::max(currAngleX, newAngleX);
+      double nextAngleY = std::max(currAngleY, newAngleY);
+      double nextNear = std::min(_frustumParams._near, newParams._near);
+      double nextFar = std::max(_frustumParams._far, newParams._far);
+
+      _frustumParams._right = tan(nextAngleX) * nextNear;
+      _frustumParams._left = -_frustumParams._right;
+      _frustumParams._top = tan(nextAngleY) * nextNear;
+      _frustumParams._bottom = -_frustumParams._top;
+      _frustumParams._near = nextNear;
+      _frustumParams._far = nextFar;
+    }
   }
 }
 
 Camera::ProjParams Camera::getOrtoParamsToSeeAll() {
-  // TODO: add adding margins here after moving it away from readExtremeCoordinates()
-
   ProjParams ret;
   ret._left = _extremeCoordinates._coord[0];
   ret._right = _extremeCoordinates._coord[1];
@@ -255,8 +288,6 @@ Camera::ProjParams Camera::getFrustumParamsToSeeAllInFrontOfCamera() {
     if(gammaY > maxGammaY) {
       maxGammaY = gammaY;
     }
-
-    // TODO: margins!
   }
 
   if(someObjectsFound) {
