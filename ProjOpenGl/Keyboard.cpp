@@ -63,16 +63,16 @@ void handleKeyPressed(unsigned char key, int x, int y) {
 
   // frustum parameters
   case 'x': // zoom in
-    camera.changeFrustumNear(-0.01);
-    break;
-  case 'z': // zoom out
     camera.changeFrustumNear(0.01);
     break;
+  case 'z': // zoom out
+    camera.changeFrustumNear(-0.01);
+    break;
   case 'v':
-    camera.changeFrustumFar(-0.2);
+    camera.changeFrustumFar(0.2);
     break;
   case 'c':
-    camera.changeFrustumFar(0.2);
+    camera.changeFrustumFar(-0.2);
     break;
 
   default:
