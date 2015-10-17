@@ -90,6 +90,7 @@ void setupOpenGL(int & argc, char **argv) {
   glutDisplayFunc(paint);
   glutReshapeFunc(reshape);
   glutKeyboardFunc(handleKeyPressed);
+  glEnable(GL_DEPTH_TEST);
 
   camera.setProjection(Camera::Projection::Frustum);
   camera.setFollowAllObjects(true);
@@ -116,7 +117,7 @@ void paint() {
   setViewport();
 
   glClearColor(0, 1, 1, 1);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   paintPhysicalObjects();
   paintTracks();
