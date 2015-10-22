@@ -75,6 +75,13 @@ void handleKeyPressed(unsigned char key, int x, int y) {
     camera.changeFrustumFar(-0.2);
     break;
 
+  case 'm':
+    lightFromCamera = !lightFromCamera;
+    break;
+  case 'n':
+    directionalLight = !directionalLight;
+    break;
+
   default:
     break;
   }

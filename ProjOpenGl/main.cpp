@@ -21,6 +21,8 @@ const Color defaultColors[] = {
   { 255, 0, 0 },
 };
 
+const float light_off[] = { 0, 0, 0, 1 };
+
 struct PhysObjData {
   Color _color;
   Color _trackColor;
@@ -92,6 +94,8 @@ void setupOpenGL(int & argc, char **argv) {
   glutKeyboardFunc(handleKeyPressed);
   glEnable(GL_DEPTH_TEST);
 
+  setupLights();
+
   camera.setProjection(Camera::Projection::Frustum);
   camera.setFollowAllObjects(true);
 }
@@ -119,6 +123,7 @@ void paint() {
   glClearColor(0, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  setLightProperties();
   paintPhysicalObjects();
   paintTracks();
   paintBorderAroundViewport();
@@ -182,7 +187,7 @@ void paintPhysicalObjects() {
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const double radius = static_cast<const SphericalObject &>(*po)._radius;
       glLineWidth(lineWidthSpherObj);
-      drawGlutSphere(pos.v[0], pos.v[1], pos.v[2], radius, 20, 20, false);
+      drawGlutSphere(pos.v[0], pos.v[1], pos.v[2], radius, 50, 50, true);
     }
     else {
       glLineWidth(lineWidthPhysObj);
@@ -269,4 +274,49 @@ void printPrecisionTestResult() {
       << ptr._rightXRangeDeviationPercentage.second << " %)" << endl;
   cout << "left x diff: " << ptr._leftXRangeDiff
       << " (" << ptr._leftXRangeDiffPercentage << " %)" << endl;
+}
+
+void setupLights() {
+  const float light_ambient[] = { 0.6, 0.6, 0.6, 1 };
+  const float light_difuse[] = { 0.4, 0.4, 0.4, 1 };
+  const float light_specular[] = { 0.6, 0.6, 0.6, 1 };
+
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_LIGHTING);
+
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light_ambient);
+
+  glEnable(GL_LIGHT0);
+  glLightfv(GL_LIGHT0, GL_AMBIENT, light_off);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_difuse);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+
+  const float material_specular[] = { 1, 1, 1, 0 };
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material_specular);
+  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 128); // shininess for specular light (0-128)
+
+  // Instead of calling glMaterialfv() for ambient and diffuse:
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
+
+  // TODO: different material and color settings for objects, tracks and border
+}
+
+void setLightProperties() {
+  static const float direction[] = { 0, 0, 1, 0 };
+  static const float position[] = { 0, 0, 0, 1 };
+
+  if(lightFromCamera) {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+  }
+
+  glLightfv(GL_LIGHT0, GL_POSITION, directionalLight ? direction : position);
+
+  if(lightFromCamera) {
+    glPopMatrix();
+  }
+
+  // TODO: different lights for objects, tracks and border
 }

@@ -5,4 +5,7 @@
 
 extern Camera camera;
 
+extern bool lightFromCamera;
+extern bool directionalLight;
+
 #endif /* PROJOPENGL_MAINDATA_H_ */

@@ -173,7 +173,7 @@ bool loadUniverseData(Universe & u) {
     earth._mass = 5.972 * pow(10, 24);
     earth._position = Vector(0, 0, -(earth._radius * 2));
     earth._velocity = Vector(0, 0, 0);
-    pop._color = { 47, 183, 0 };
+    pop._color = { 0, 255, 0 };
     pop._tracked = true;
     u.insertPhysicalObject(earth, pop);
 
@@ -186,9 +186,8 @@ bool loadUniverseData(Universe & u) {
     double x = a * cos(angle);
     double z = a * sin(angle);
     iss._position = Vector(x, 0, z + earth._position.v[2]);
-
     iss._velocity = Vector(0, 7706, 0);
-    pop._color = Color();
+    pop._color = { 255, 0, 0 };
     pop._tracked = true;
     u.insertPhysicalObject(iss, pop);
 
