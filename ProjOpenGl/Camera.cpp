@@ -11,7 +11,6 @@ Camera::Camera()
   , _projection(Projection::Orto)
   , _updateGlProjection(true)
   , _currObjects(NULL)
-  , _projectionPlaneSize(0,0)
 {
 }
 
@@ -313,9 +312,6 @@ void Camera::useProjectionParameters() {
       return;
     }
 
-    _projectionPlaneSize.first = _ortoParams._right - _ortoParams._left;
-    _projectionPlaneSize.second = _ortoParams._top - _ortoParams._bottom;
-
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(_ortoParams._left, _ortoParams._right,
@@ -327,9 +323,6 @@ void Camera::useProjectionParameters() {
       return;
     }
 
-    _projectionPlaneSize.first = _frustumParams._right - _frustumParams._left;
-    _projectionPlaneSize.second = _frustumParams._top - _frustumParams._bottom;
-
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum(_frustumParams._left, _frustumParams._right,
@@ -339,7 +332,13 @@ void Camera::useProjectionParameters() {
 }
 
 std::pair<double, double> Camera::getProjectionPlaneSize() const {
-  return _projectionPlaneSize;
+  const ProjParams & pp = _projection == Projection::Orto ? _ortoParams : _frustumParams;
+  if(pp._valid) {
+    return { pp._right - pp._left, pp._top - pp._bottom };
+  }
+  else {
+    return { 0, 0 };
+  }
 }
 
 double Camera::getGreatestCoordinateDifference() const {
@@ -410,7 +409,8 @@ void Camera::changeFrustumFar(double factor) {
 
 void Camera::translate(Axis a, double factor) {
   glm::dvec3 tv(0);
-  const double refValue = (_projectionPlaneSize.first + _projectionPlaneSize.second) / 2;
+  auto projPlaneSize = getProjectionPlaneSize();
+  const double refValue = (projPlaneSize.first + projPlaneSize.second) / 2;
 
   switch(a) {
   case Axis::X:

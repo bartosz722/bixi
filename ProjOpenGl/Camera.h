@@ -85,7 +85,6 @@ private:
   ProjParams _frustumParams;
 
   const PhysicalObjectsContainer * _currObjects;
-  std::pair<double, double> _projectionPlaneSize;
   double _storedModelViewMatrix[16];
   glm::dmat4x4 _cachedModelViewMatrix;
 };
