@@ -407,6 +407,57 @@ void Camera::changeFrustumFar(double factor) {
   _followAllObjects = false;
 }
 
+void Camera::changeProjectionPlaneSize(double factor) {
+  ProjParams & projParams = _projection == Projection::Orto ? _ortoParams : _frustumParams;
+  ProjParams & refParams = _referenceForChangingProjectionPlaneSize; // make name shorter
+  if(_followAllObjects || !refParams._valid) {
+    refParams = projParams;
+  }
+
+  if(!projParams._valid || !refParams._valid) {
+    return;
+  }
+
+  double refX = refParams._right - refParams._left;
+  double refY = refParams._top - refParams._bottom;
+  double changeX, changeY;
+
+  bool changed = false; // for message
+  for(int i=0; i<10; ++i) {
+    changeX = refX * factor;
+    changeY = refY * factor;
+    ProjParams newProjParams = projParams;
+
+    newProjParams._right += changeX;
+    newProjParams._left -= changeX;
+    newProjParams._top += changeY;
+    newProjParams._bottom -= changeY;
+
+    if(newProjParams._right <= newProjParams._left ||
+       newProjParams._top <= newProjParams._bottom) {
+      factor /= 10.0;
+    }
+    else {
+      projParams = newProjParams;
+      changed = true;
+      break;
+    }
+  }
+
+  std::cout << "changeProjectionPlaneSize(): ";
+  if(changed) {
+    std::cout << "factor: " << factor << ", changeX: " << changeX << ", changeY: " << changeY;
+  } else {
+    std::cout << "nothing changed";
+  }
+  std::cout << std::endl;
+
+  _updateGlProjection = true;
+  _followAllObjects = false;
+
+  // TODO: Remember zoom history. Then zoom in-out will work better at small factors.
+}
+
 void Camera::translate(Axis a, double factor) {
   glm::dvec3 tv(0);
   auto projPlaneSize = getProjectionPlaneSize();
