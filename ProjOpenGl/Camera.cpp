@@ -15,9 +15,11 @@ Camera::Camera()
 }
 
 void Camera::setFollowAllObjects(bool f) {
+  if(!_followAllObjects && f) {
+    _ortoParams._valid = false;
+    _frustumParams._valid = false;
+  }
   _followAllObjects = f;
-  _ortoParams._valid = false;
-  _frustumParams._valid = false;
 }
 
 void Camera::setProjection(Projection p) {
