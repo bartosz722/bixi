@@ -8,7 +8,7 @@ INCLUDEPATH += . ../PhysicalObjects ../Utilities ../Universe ../UtilitiesGl
 CONFIG -= qt
 CONFIG += c++11
 QMAKE_CXXFLAGS += -pthread -g
-LIBS += -pthread -lGL -lglut -lGLU
+LIBS += -pthread -lGL -lglut -lGLU -ljpeg
 
 # Input
 HEADERS += ../PhysicalObjects/PhysicalObject.h \
@@ -29,6 +29,7 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Utilities/CyclicBuffer.h \
            ../Utilities/Color.h \
            ../Utilities/Math.h \
+           ../Utilities/ImageData.h \
            ../Utilities/ScopedFile.h \
            ../UtilitiesGl/UtilGlDraw.h \
            ../ProjOpenGl/main.h \
@@ -47,6 +48,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp \
            ../Utilities/Math.cpp \
+           ../Utilities/ImageData.cpp \
            ../UtilitiesGl/UtilGlDraw.cpp \
            ../ProjOpenGl/main.cpp \
            ../ProjOpenGl/Camera.cpp \
