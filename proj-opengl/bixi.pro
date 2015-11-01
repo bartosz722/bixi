@@ -29,6 +29,7 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Utilities/CyclicBuffer.h \
            ../Utilities/Color.h \
            ../Utilities/Math.h \
+           ../Utilities/ScopedFile.h \
            ../UtilitiesGl/UtilGlDraw.h \
            ../ProjOpenGl/main.h \
            ../ProjOpenGl/Camera.h \
