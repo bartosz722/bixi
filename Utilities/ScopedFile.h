@@ -17,6 +17,9 @@ public:
 
 private:
   FILE * _f;
+
+  ScopedFile(ScopedFile &) = delete;
+  void operator=(ScopedFile &) = delete;
 };
 
 #endif /* UTILITIES_SCOPEDFILE_H_ */
