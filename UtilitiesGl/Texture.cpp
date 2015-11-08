@@ -20,10 +20,40 @@ void Texture::destroy() {
   }
 }
 
+void Texture::createTexture() {
+  glGenTextures(1, &_id);
+  _idValid = true;
+  glBindTexture(GL_TEXTURE_2D, _id);
+  cout << "texure created: " << _id << endl;
+}
+
+bool Texture::createOneColor(GLubyte r, GLubyte g, GLubyte b) {
+  if(_idValid) {
+    cout << "Texture reloading is not supported\n";
+    return false;
+  }
+
+  createTexture();
+
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+  GLubyte texData [] = { r, g, b };
+  auto buildRet = gluBuild2DMipmaps(
+      GL_TEXTURE_2D, 3, 1, 1,
+      GL_RGB, GL_UNSIGNED_BYTE, texData);
+  if(buildRet != 0) {
+    destroy();
+    return false;
+  }
+
+  return true;
+}
+
 bool Texture::createFromImage(const char * filename) {
   if(_idValid) {
     cout << "Texture reloading is not supported\n";
-    return false; // reloading is not supported
+    return false;
   }
 
   if(!setupTextureAndLoadFile(filename)) {
@@ -38,12 +68,7 @@ bool Texture::createFromImage(const char * filename) {
 }
 
 bool Texture::setupTextureAndLoadFile(const char * filename) {
-  glGenTextures(1, &_id);
-  _idValid = true;
-
-  cout << "texure created: " << _id << endl;
-
-  glBindTexture(GL_TEXTURE_2D, _id);
+  createTexture();
 
   // Texture resize options
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,

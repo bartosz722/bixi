@@ -14,6 +14,7 @@ bool loadUniverseData(Universe & u) {
   s._collision = Universe::CollisionBehaviour::StopUniverse;
   s._collisionTolerance = 0.00001;
 
+  // TODO: this properties should belong to GUI part
   PhysicalObjectProperties pop;
 
   if(physObjSet == 1) {
@@ -175,6 +176,7 @@ bool loadUniverseData(Universe & u) {
     earth._velocity = Vector(0, 0, 0);
     pop._color = { 0, 255, 0 };
     pop._tracked = true;
+    pop._texture = "earth-tex.jpg";
     u.insertPhysicalObject(earth, pop);
 
     SphericalObject iss;
@@ -189,6 +191,7 @@ bool loadUniverseData(Universe & u) {
     iss._velocity = Vector(0, 7706, 0);
     pop._color = { 255, 0, 0 };
     pop._tracked = true;
+    pop._texture = "Funny-Cat-26.jpg";
     u.insertPhysicalObject(iss, pop);
 
     SphericalObject rock;
@@ -198,6 +201,7 @@ bool loadUniverseData(Universe & u) {
     rock._radius = 1000 * 300;
     pop._color = { 47, 183, 0 };
     pop._tracked = true;
+    pop._texture = nullptr;
 //    u.insertPhysicalObject(rock, pop);
   }
 

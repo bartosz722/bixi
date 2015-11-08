@@ -24,16 +24,22 @@ const Color defaultColors[] = {
 const float light_off[] = { 0, 0, 0, 1 };
 
 struct PhysObjData {
+  PhysObjData() : _textureIdx(-1) {}
   Color _color;
-  Color _trackColor;
+  int _textureIdx;
 };
+
+bool precisionTestMode = false;
+bool lightsEnabled = false;
+bool texturesEnabled = true;
 
 Universe universe;
 Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
+vector<Texture> textures;
+Texture defaultTexture;
 
-bool precisionTestMode = false;
 bool doPaintPhysicalObejcts = true;
 size_t readUniverseCallCount = 0;
 
@@ -94,7 +100,13 @@ void setupOpenGL(int & argc, char **argv) {
   glutKeyboardFunc(handleKeyPressed);
   glEnable(GL_DEPTH_TEST);
 
-  setupLights();
+  if(lightsEnabled) {
+    setupLights();
+  }
+
+  if(texturesEnabled) {
+    setupTextures();
+  }
 
   camera.setProjection(Camera::Projection::Frustum);
   camera.setFollowAllObjects(true);
@@ -123,7 +135,10 @@ void paint() {
   glClearColor(0, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  setLightProperties();
+  if(lightsEnabled) {
+    setLightProperties();
+  }
+
   paintPhysicalObjects();
   paintTracks();
   paintBorderAroundViewport();
@@ -183,11 +198,22 @@ void paintPhysicalObjects() {
 
     glColor3ubv(objData[po->getId()]._color.rgbData());
 
+    if(texturesEnabled) {
+      int textureIdx = objData[po->getId()]._textureIdx;
+      if(textureIdx >= 0) {
+        assert(textureIdx < static_cast<int>(textures.size()));
+        textures[textureIdx].use();
+      }
+      else {
+        defaultTexture.use();
+      }
+    }
+
     const Vector & pos = po->_position;
     if(po->getType() == PhysicalObjectType::SphericalObject) {
       const double radius = static_cast<const SphericalObject &>(*po)._radius;
       glLineWidth(lineWidthSpherObj);
-      drawGlutSphere(pos.v[0], pos.v[1], pos.v[2], radius, 50, 50, true);
+      drawGluSphere(pos.v[0], pos.v[1], pos.v[2], radius, 50, 50, texturesEnabled);
     }
     else {
       glLineWidth(lineWidthPhysObj);
@@ -319,4 +345,30 @@ void setLightProperties() {
   }
 
   // TODO: different lights for objects, tracks and border
+}
+
+void setupTextures() {
+  glEnable(GL_TEXTURE_2D);
+
+  // Replace color of object with colors from texture
+  glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+  for(const auto & prop : universe.getPhysicalObjectsProperties()) {
+    const int objId = prop.getId();
+
+    const char * textureFileName = prop._texture;
+    if(textureFileName == NULL) {
+      continue;
+    }
+
+    Texture tex;
+    if(!tex.createFromImage(textureFileName)) {
+      continue;
+    }
+
+    textures.push_back(tex);
+    objData[objId]._textureIdx = textures.size() - 1;
+  }
+
+  defaultTexture.createOneColor(0, 100, 255);
 }

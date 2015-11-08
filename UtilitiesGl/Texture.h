@@ -7,19 +7,18 @@ class Texture {
 public:
   Texture();
 
+  bool createOneColor(GLubyte r, GLubyte g, GLubyte b);
   bool createFromImage(const char * filename);
   void destroy();
 
   void use();
 
 private:
+  void createTexture();
   bool setupTextureAndLoadFile(const char * filename);
 
   bool _idValid;
   GLuint _id;
-
-  Texture(Texture &) = delete;
-  void operator=(Texture &) = delete;
 };
 
 #endif /* UTILITIESGL_TEXTURE_H_ */

@@ -15,11 +15,13 @@
 #include "PhysicalObjectsContainer.h"
 #include "MainData.h"
 #include "Keyboard.h"
+#include "Texture.h"
 
 void printPhysicalObjects(const PhysicalObjectsContainer & poc);
 void setupUniverse();
 void setupOpenGL(int & argc, char **argv);
 void setupLights();
+void setupTextures();
 void paint();
 void paintPhysicalObjects();
 void paintTracks();

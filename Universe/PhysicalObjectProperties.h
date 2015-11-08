@@ -13,6 +13,7 @@ public:
 
   Color _color;
   bool _tracked;
+  const char * _texture;
 
 private:
   int _id;
