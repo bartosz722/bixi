@@ -7,4 +7,7 @@ void drawFilledCircle(double centerX, double centerY, double centerZ, double rad
 void drawGlutSphere(double centerX, double centerY, double centerZ,
                     double radius, int slices, int stacks, bool solid);
 
+void drawGluSphere(double centerX, double centerY, double centerZ,
+                   double radius, int slices, int stacks, bool enableTexturing);
+
 #endif

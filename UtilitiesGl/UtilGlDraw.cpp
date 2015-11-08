@@ -1,5 +1,7 @@
 #include <GL/glut.h>
+#include <GL/glu.h>
 #include <cmath>
+#include <cassert>
 
 void drawFilledCircle(double centerX, double centerY, double centerZ, double radius, int parts) {
   glMatrixMode(GL_MODELVIEW);
@@ -54,6 +56,22 @@ void drawGlutSphere(double centerX, double centerY, double centerZ,
   else {
     glutWireSphere(radius, slices, stacks);
   }
+
+  glPopMatrix();
+}
+
+void drawGluSphere(double centerX, double centerY, double centerZ,
+                   double radius, int slices, int stacks, bool enableTexturing) {
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glTranslated(centerX, centerY, centerZ);
+  glRotated(-90, 1, 0, 0); // initial orientation
+
+  GLUquadric * qu = gluNewQuadric();
+  assert(qu != NULL);
+  gluQuadricTexture(qu, enableTexturing ? GLU_TRUE : GLU_FALSE);
+  gluSphere(qu, radius, slices, stacks);
+  gluDeleteQuadric(qu);
 
   glPopMatrix();
 }
