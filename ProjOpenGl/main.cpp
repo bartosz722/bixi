@@ -24,9 +24,9 @@ const Color defaultColors[] = {
 const float light_off[] = { 0, 0, 0, 1 };
 
 struct PhysObjData {
-  PhysObjData() : _textureIdx(-1) {}
   Color _color;
-  int _textureIdx;
+  Texture _texture; // "real" texture, from image
+  Texture _colorTexture; // one color texture
 };
 
 bool precisionTestMode = false;
@@ -37,8 +37,7 @@ Universe universe;
 Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
-vector<Texture> textures;
-Texture defaultTexture;
+Texture borderColorTexture;
 
 bool doPaintPhysicalObejcts = true;
 size_t readUniverseCallCount = 0;
@@ -196,16 +195,17 @@ void paintPhysicalObjects() {
       continue;
     }
 
-    glColor3ubv(objData[po->getId()]._color.rgbData());
+    auto & currObjData = objData[po->getId()];
 
-    if(texturesEnabled) {
-      int textureIdx = objData[po->getId()]._textureIdx;
-      if(textureIdx >= 0) {
-        assert(textureIdx < static_cast<int>(textures.size()));
-        textures[textureIdx].use();
+    if(!texturesEnabled) {
+      glColor3ubv(currObjData._color.rgbData());
+    }
+    else {
+      if(currObjData._texture.isValid()) {
+        currObjData._texture.use();
       }
       else {
-        defaultTexture.use();
+        currObjData._colorTexture.use();
       }
     }
 
@@ -232,7 +232,13 @@ void paintPhysicalObjects() {
 void paintTracks() {
   const auto & tracks = tracker.getTracks();
   for(const auto & t : tracks) {
-    glColor3ubv(objData[t.first]._color.rgbData());
+    if(!texturesEnabled) {
+      glColor3ubv(objData[t.first]._color.rgbData());
+    }
+    else {
+      objData[t.first]._colorTexture.use();
+    }
+
     glLineWidth(lineWidthTrack);
     glBegin(GL_LINE_STRIP);
 
@@ -254,7 +260,13 @@ void paintBorderAroundViewport() {
     glPushMatrix();
     glLoadIdentity();
 
-    glColor3ub(193, 86, 255);
+    if(!texturesEnabled) {
+      glColor3ub(0, 0, 255);
+    }
+    else {
+      borderColorTexture.use();
+    }
+
     glLineWidth(lineWidthViewportBorder);
     glBegin(GL_LINE_LOOP);
     glVertex3d(-1, -1, 0);
@@ -355,20 +367,18 @@ void setupTextures() {
 
   for(const auto & prop : universe.getPhysicalObjectsProperties()) {
     const int objId = prop.getId();
+    auto & currObjData = objData[objId];
 
     const char * textureFileName = prop._texture;
-    if(textureFileName == NULL) {
-      continue;
+    if(textureFileName != NULL) {
+      currObjData._texture.createFromImage(textureFileName);
     }
 
-    Texture tex;
-    if(!tex.createFromImage(textureFileName)) {
-      continue;
-    }
-
-    textures.push_back(tex);
-    objData[objId]._textureIdx = textures.size() - 1;
+    const auto & currColor = currObjData._color;
+    assert(currColor.isValid());
+    currObjData._colorTexture.createOneColor(
+        currColor.rgbData()[0], currColor.rgbData()[1], currColor.rgbData()[2]);
   }
 
-  defaultTexture.createOneColor(0, 100, 255);
+  borderColorTexture.createOneColor(0, 0, 255);
 }

@@ -11,6 +11,7 @@ public:
   bool createFromImage(const char * filename);
   void destroy();
 
+  bool isValid() const { return _idValid; }
   void use();
 
 private:
