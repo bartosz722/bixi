@@ -8,7 +8,9 @@ public:
   ImageData();
   ~ImageData();
 
+  // Returns not NULL when image was successfully loaded
   uint8_t * getRGBData() const { return _data; }
+
   size_t getWidth() const { return _width; }
   size_t getHeight() const { return _height; }
 

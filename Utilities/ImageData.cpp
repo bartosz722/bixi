@@ -53,6 +53,7 @@ bool ImageData::readJpegData(FILE * infile) {
 
   if(!jpeg_start_decompress(&cinfo)) {
     std::cout << "Error in ImageData::loadJpegFile(): " << 1 << std::endl;
+    return false;
   }
 
   _data = new uint8_t [cinfo.output_width * cinfo.output_height * cinfo.num_components];
