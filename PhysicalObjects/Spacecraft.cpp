@@ -6,17 +6,69 @@
  */
 
 #include "Spacecraft.h"
+#include "Assert.h"
 
 Spacecraft::Spacecraft()
-  : _deltaMass(0.0)
+  : _engineOn(false)
+  , _propellantMass(0.0)
+  , _thrustMassRate(0.0)
+  , _propellantRunsOut(false)
+  , _ejectedPropellantMass(0.0)
 {
   _type = PhysicalObjectType::Spacecraft;
 }
 
 Spacecraft::~Spacecraft() {
-  // TODO Auto-generated destructor stub
 }
 
-void Spacecraft::moveToNextState() {
-  // TODO
+std::unique_ptr<PhysicalObject> Spacecraft::copy() const {
+  return std::unique_ptr<PhysicalObject>(new Spacecraft(*this));
+}
+
+void Spacecraft::copyFrom(const PhysicalObject & other) {
+  ASSERT(getType() == other.getType());
+  new (this) Spacecraft(static_cast<const Spacecraft &>(other));
+}
+
+void Spacecraft::calculateNextStateVariables(double deltaTime) {
+  if(!_engineOn) {
+    return;
+  }
+
+  Vector forceFromThruster;
+  _ejectedPropellantMass = _thrustMassRate * deltaTime;
+
+  if(_ejectedPropellantMass < _propellantMass) {
+    _propellantRunsOut = false;
+    forceFromThruster = _thrustSpeed * (_thrustMassRate * -1.0);
+  }
+  else {
+    _propellantRunsOut = true;
+    _ejectedPropellantMass = _propellantMass;
+    Vector ejectedMomentum = _thrustSpeed * _ejectedPropellantMass;
+    forceFromThruster = ejectedMomentum * (-1.0 / deltaTime);
+  }
+
+  _force = _force + forceFromThruster;
+}
+
+void Spacecraft::moveToNextState(double deltaTime) {
+  if(_engineOn) {
+    _mass -= _ejectedPropellantMass;
+    if(_propellantRunsOut) {
+      _engineOn = false;
+      _propellantMass = 0.0;
+    }
+    else {
+      _propellantMass -= _ejectedPropellantMass;
+    }
+  }
+
+  PhysicalObject::moveToNextState(deltaTime);
+}
+
+void Spacecraft::clearNextStateVariables() {
+  PhysicalObject::clearNextStateVariables();
+  _propellantRunsOut = false;
+  _ejectedPropellantMass = 0.0;
 }

@@ -2,13 +2,14 @@
 #include <cmath>
 #include "DataLoader.h"
 #include "SphericalObject.h"
+#include "Spacecraft.h"
 #include "PhysicalDefinitions.h"
 #include "PrecisionTester.h"
 
 using namespace std;
 
 bool loadUniverseData(Universe & u) {
-  int physObjSet = 6;
+  int physObjSet = 7;
 
   Universe::Settings s;
   s._collision = Universe::CollisionBehaviour::StopUniverse;
@@ -203,6 +204,35 @@ bool loadUniverseData(Universe & u) {
     pop._tracked = true;
     pop._texture = nullptr;
 //    u.insertPhysicalObject(rock, pop);
+  }
+  else if(physObjSet == 7) {
+    // spacecraft test
+    s._G = constG;
+    s._timeUnit = 0.01;
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 2 * 100;
+
+    SphericalObject earth;
+    earth._radius = 6370*1000;
+    earth._mass = 5.972 * pow(10, 24);
+    earth._position = Vector(0, 0, 0);
+    earth._velocity = Vector(0, 0, 0);
+    pop._color = { 0, 255, 0 };
+    pop._tracked = false;
+    u.insertPhysicalObject(earth, pop);
+
+    Spacecraft sc;
+    double propellantMass = 7;
+    sc._mass = 100 + propellantMass;
+    sc._position = Vector(earth._radius * 1.1, 0, 0);
+    sc._velocity = Vector(0, 0, 0);
+    sc._engineOn = true;
+    sc._propellantMass = propellantMass;
+    sc._thrustMassRate = 10.0 / 100;
+    sc._thrustSpeed = Vector(-50000, -50000, 0);
+    pop._color = { 255, 0, 0 };
+    pop._tracked = true;
+    u.insertPhysicalObject(sc, pop);
   }
 
   u.setSettings(s);

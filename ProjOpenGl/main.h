@@ -9,6 +9,7 @@
 
 #include "Universe.h"
 #include "SphericalObject.h"
+#include "Spacecraft.h"
 #include "UtilGlDraw.h"
 #include "DataLoader.h"
 #include "Tracker.h"

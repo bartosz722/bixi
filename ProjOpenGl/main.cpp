@@ -30,8 +30,8 @@ struct PhysObjData {
 };
 
 bool precisionTestMode = false;
-bool lightsEnabled = false;
-bool texturesEnabled = true;
+bool lightsEnabled = true;
+bool texturesEnabled = false;
 
 Universe universe;
 Universe::Snapshot snapshot;
@@ -66,8 +66,14 @@ void printPhysicalObjects(const PhysicalObjectsContainer & poc) {
         << ": active " << po->_active
         << ", position " << po->_position
         << ", velocity " << po->_velocity << " (abs " << po->_velocity.length() << ")"
-        << ", mass " << po->_mass
-        << endl;
+        << ", mass " << po->_mass;
+
+    if(po->getType() == PhysicalObjectType::Spacecraft) {
+      Spacecraft & s = static_cast<Spacecraft &>(*po);
+      cout << ", engine on " << s._engineOn << ", prop. mass " << s._propellantMass;
+    }
+
+    cout << endl;
   }
 }
 
@@ -107,7 +113,7 @@ void setupOpenGL(int & argc, char **argv) {
     setupTextures();
   }
 
-  camera.setProjection(Camera::Projection::Frustum);
+  camera.setProjection(Camera::Projection::Orto);
   camera.setFollowAllObjects(true);
 }
 
@@ -173,9 +179,9 @@ void readUniverse(int) {
   tracker.pushData(snapshot._objects);
 
   if(readUniverseCallCount % printPhysObjectsPeriod == 0 || !doPaintPhysicalObejcts) {
-//    cout << "current tick: " << snapshot._currentTick << endl;
-//    printPhysicalObjects(snapshot._objects);
-//    cout << "size of longest track: " << tracker.getSizeOfLongestTrack() << endl;
+    cout << "current tick: " << snapshot._currentTick << endl;
+    printPhysicalObjects(snapshot._objects);
+    cout << "size of longest track: " << tracker.getSizeOfLongestTrack() << endl;
 
     if(precisionTestMode) {
       printPrecisionTestResult();
