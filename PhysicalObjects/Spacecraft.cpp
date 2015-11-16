@@ -12,6 +12,7 @@ Spacecraft::Spacecraft()
   : _engineOn(false)
   , _propellantMass(0.0)
   , _thrustMassRate(0.0)
+  , _thrustSpeed(0.0)
   , _propellantRunsOut(false)
   , _ejectedPropellantMass(0.0)
 {
@@ -40,13 +41,13 @@ void Spacecraft::calculateNextStateVariables(double deltaTime) {
 
   if(_ejectedPropellantMass < _propellantMass) {
     _propellantRunsOut = false;
-    forceFromThruster = _thrustSpeed * (_thrustMassRate * -1.0);
+    forceFromThruster = _direction * (_thrustSpeed * _thrustMassRate);
   }
   else {
     _propellantRunsOut = true;
     _ejectedPropellantMass = _propellantMass;
-    Vector ejectedMomentum = _thrustSpeed * _ejectedPropellantMass;
-    forceFromThruster = ejectedMomentum * (-1.0 / deltaTime);
+    Vector minusEjectedMomentum = _direction * (_thrustSpeed * _ejectedPropellantMass);
+    forceFromThruster = minusEjectedMomentum / deltaTime;
   }
 
   _force = _force + forceFromThruster;

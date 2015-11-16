@@ -22,13 +22,14 @@ public:
 
   /* Engine can be turned on or off externally. Internally it can only be turned off
    * when propellant runs out.
+   * Propellant is thrust in opposite to PhysicalObject::_direction.
    */
 
   // State:
   bool _engineOn;
   double _propellantMass; // kg, it is included in _mass of PhysicalObject
   double _thrustMassRate; // kg/s
-  Vector _thrustSpeed; // m/s, relative to object
+  double _thrustSpeed; // m/s, relative to object
 
   // Next state variables:
   bool _propellantRunsOut;
