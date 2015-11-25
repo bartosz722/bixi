@@ -221,6 +221,9 @@ void paintPhysicalObjects() {
       glLineWidth(lineWidthSpherObj);
       drawGluSphere(pos.v[0], pos.v[1], pos.v[2], radius, 50, 50, texturesEnabled);
     }
+    else if(po->getType() == PhysicalObjectType::Spacecraft) {
+      drawSpacecraft(static_cast<const Spacecraft &>(*po), physObjDrawSize);
+    }
     else {
       glLineWidth(lineWidthPhysObj);
       glBegin(GL_LINES);
@@ -387,4 +390,10 @@ void setupTextures() {
   }
 
   borderColorTexture.createOneColor(0, 0, 255);
+}
+
+void drawSpacecraft(const Spacecraft & spacecraft, double size) {
+  drawGluCylinder(vectorToGlmDvec3(spacecraft._position),
+                  vectorToGlmDvec3(spacecraft._direction),
+                  size, 0, size * 2.5, 30, 30, false);
 }

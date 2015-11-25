@@ -33,6 +33,7 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Utilities/ScopedFile.h \
            ../UtilitiesGl/UtilGlDraw.h \
            ../UtilitiesGl/Texture.h \
+           ../UtilitiesGl/GlVectorConversion.h \
            ../ProjOpenGl/main.h \
            ../ProjOpenGl/Camera.h \
            ../ProjOpenGl/Keyboard.h \
@@ -52,6 +53,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../Utilities/ImageData.cpp \
            ../UtilitiesGl/UtilGlDraw.cpp \
            ../UtilitiesGl/Texture.cpp \
+           ../UtilitiesGl/GlVectorConversion.cpp \
            ../ProjOpenGl/main.cpp \
            ../ProjOpenGl/Camera.cpp \
            ../ProjOpenGl/Keyboard.cpp \

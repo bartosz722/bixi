@@ -17,6 +17,7 @@
 #include "MainData.h"
 #include "Keyboard.h"
 #include "Texture.h"
+#include "GlVectorConversion.h"
 
 void printPhysicalObjects(const PhysicalObjectsContainer & poc);
 void setupUniverse();
@@ -32,5 +33,6 @@ void reshape(int x, int y);
 void readUniverse(int);
 void setupLocalPhysicalObjectData();
 void printPrecisionTestResult();
+void drawSpacecraft(const Spacecraft & spacecraft, double size);
 
 #endif /* PROJOPENGL_MAIN_H_ */
