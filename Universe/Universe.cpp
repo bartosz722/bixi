@@ -5,6 +5,7 @@
 #include "Universe.h"
 #include "Assert.h"
 #include "SphericalObject.h"
+#include "Spacecraft.h"
 #include "CollisionComparator.h"
 #include "Math.h"
 
@@ -124,13 +125,21 @@ void Universe::setRuntimeDataToStartValues() {
 }
 
 void Universe::tick() {
-  // Calculate gravity force
+  for(auto const & po : _objects) {
+    if(!po->_active) {
+      continue;
+    }
+    po->clearNextStateVariables();
+  }
+
+  // Calculate next state of objects
   for(auto it1 = _objects.cbegin(); it1 != _objects.cend(); ++it1) {
     PhysicalObject & obj1 = **it1;
     if(!obj1._active) {
       continue;
     }
 
+    // Gravity force
     for(auto it2 = it1 + 1; it2 != _objects.cend(); ++it2) {
       PhysicalObject & obj2 = **it2;
       if(!obj2._active) {
@@ -141,17 +150,23 @@ void Universe::tick() {
       obj1._force = obj1._force + gForce;
       obj2._force = obj2._force + gForce * -1.0;
     }
+
+    // Thrust of spacecraft engine
+    if(obj1.getType() == PhysicalObjectType::Spacecraft) {
+      Spacecraft & s = static_cast<Spacecraft &>(obj1);
+      s.calculateNextStateVariables(_sett._timeUnit);
+    }
   }
 
+  // Move objects to next state
   for(auto const & po : _objects) {
     if(!po->_active) {
       continue;
     }
     po->moveToNextState(_sett._timeUnit);
-    po->clearNextStateVariables();
   }
 
-  // From here phys object can be deactivated.
+  // From now on objects can be deactivated.
 
   // Check for collisions
   if(_sett._collision != CollisionBehaviour::None) {

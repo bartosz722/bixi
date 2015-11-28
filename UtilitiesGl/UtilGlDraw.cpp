@@ -2,6 +2,7 @@
 #include <GL/glu.h>
 #include <cmath>
 #include <cassert>
+#include "UtilGlDraw.h"
 
 void drawFilledCircle(double centerX, double centerY, double centerZ, double radius, int parts) {
   glMatrixMode(GL_MODELVIEW);
@@ -74,4 +75,17 @@ void drawGluSphere(double centerX, double centerY, double centerZ,
   gluDeleteQuadric(qu);
 
   glPopMatrix();
+}
+
+void drawGluCylinder(double base, double top, double height,
+                     int slices, int stacks, bool enableTexturing) {
+  GLUquadric * qu = gluNewQuadric();
+  assert(qu != NULL);
+  gluQuadricTexture(qu, enableTexturing ? GLU_TRUE : GLU_FALSE);
+  gluCylinder(qu, base, top, height, slices, stacks);
+  gluDeleteQuadric(qu);
+
+  /* gluCylinder():
+   * Base of cylinder is on XY plane. Height raises in direction of Z axis
+   */
 }

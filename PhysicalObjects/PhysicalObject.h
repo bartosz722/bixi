@@ -32,6 +32,7 @@ public:
   // State:
   double _mass; // kg
   Vector _position; // m
+  Vector _direction; // dimensionless; it has always a length of 1
   Vector _velocity; // m/s, relative to [0,0,0]
   bool _active;
 

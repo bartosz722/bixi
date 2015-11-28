@@ -9,6 +9,7 @@
 
 #include "Universe.h"
 #include "SphericalObject.h"
+#include "Spacecraft.h"
 #include "UtilGlDraw.h"
 #include "DataLoader.h"
 #include "Tracker.h"
@@ -16,6 +17,7 @@
 #include "MainData.h"
 #include "Keyboard.h"
 #include "Texture.h"
+#include "GlVectorUtil.h"
 
 void printPhysicalObjects(const PhysicalObjectsContainer & poc);
 void setupUniverse();
@@ -31,5 +33,8 @@ void reshape(int x, int y);
 void readUniverse(int);
 void setupLocalPhysicalObjectData();
 void printPrecisionTestResult();
+void drawSpacecraft(const Spacecraft & spacecraft, double size,
+                    const Color & spacecraftColor, const Texture & spacecraftTexture,
+                    const Color & exhaustColor, const Texture & exhaustTexture);
 
 #endif /* PROJOPENGL_MAIN_H_ */
