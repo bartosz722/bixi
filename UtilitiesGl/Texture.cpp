@@ -96,7 +96,7 @@ bool Texture::setupTextureAndLoadFile(const char * filename) {
   return true;
 }
 
-void Texture::use() {
+void Texture::use() const {
   if(_idValid) {
     glBindTexture(GL_TEXTURE_2D, _id);
   }

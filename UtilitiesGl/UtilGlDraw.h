@@ -12,8 +12,7 @@ void drawGlutSphere(double centerX, double centerY, double centerZ,
 void drawGluSphere(double centerX, double centerY, double centerZ,
                    double radius, int slices, int stacks, bool enableTexturing);
 
-void drawGluCylinder(const glm::dvec3 & center, const glm::dvec3 & direction,
-                     double base, double top, double height,
+void drawGluCylinder(double base, double top, double height,
                      int slices, int stacks, bool enableTexturing);
 
 #endif

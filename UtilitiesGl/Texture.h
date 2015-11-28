@@ -12,7 +12,7 @@ public:
   void destroy();
 
   bool isValid() const { return _idValid; }
-  void use();
+  void use() const;
 
 private:
   void createTexture();

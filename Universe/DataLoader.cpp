@@ -219,21 +219,23 @@ bool loadUniverseData(Universe & u) {
     earth._velocity = Vector(0, 0, 0);
     pop._color = { 0, 255, 0 };
     pop._tracked = false;
+    pop._texture = "earth-tex.jpg";
     u.insertPhysicalObject(earth, pop);
 
     Spacecraft sc;
-    double propellantMass = 10;
+    double propellantMass = 20;
     sc._mass = 100 + propellantMass;
     sc._position = Vector(earth._radius * 1.1, 0, 0);
-    double angle = (M_PI / 180.0) * 80;
+    double angle = (M_PI / 180.0) * 70;
     sc._direction = Vector(cos(angle), sin(angle), 0);
     sc._velocity = Vector(0, 0, 0);
     sc._engineOn = true;
     sc._propellantMass = propellantMass;
     sc._thrustMassRate = 10.0 / 100;
-    sc._thrustSpeed = 80000;
+    sc._thrustSpeed = 50000;
     pop._color = { 255, 0, 0 };
     pop._tracked = true;
+    pop._texture = NULL;
     u.insertPhysicalObject(sc, pop);
   }
 

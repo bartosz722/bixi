@@ -21,6 +21,8 @@ const Color defaultColors[] = {
   { 255, 0, 0 },
 };
 
+const Color engineExhaustColor(255, 255, 0);
+
 const float light_off[] = { 0, 0, 0, 1 };
 
 struct PhysObjData {
@@ -38,6 +40,7 @@ Universe::Snapshot snapshot;
 Tracker tracker(trackDensity, trackLength);
 map<int, PhysObjData> objData;
 Texture borderColorTexture;
+Texture engineExhaustTexture;
 
 bool doPaintPhysicalObejcts = true;
 size_t readUniverseCallCount = 0;
@@ -113,7 +116,7 @@ void setupOpenGL(int & argc, char **argv) {
     setupTextures();
   }
 
-  camera.setProjection(Camera::Projection::Orto);
+  camera.setProjection(Camera::Projection::Frustum);
   camera.setFollowAllObjects(true);
 }
 
@@ -222,7 +225,14 @@ void paintPhysicalObjects() {
       drawGluSphere(pos.v[0], pos.v[1], pos.v[2], radius, 50, 50, texturesEnabled);
     }
     else if(po->getType() == PhysicalObjectType::Spacecraft) {
-      drawSpacecraft(static_cast<const Spacecraft &>(*po), physObjDrawSize);
+      Texture * spacecraftTexture = & currObjData._texture;
+      if(!spacecraftTexture->isValid()) {
+        spacecraftTexture = & currObjData._colorTexture;
+      }
+
+      drawSpacecraft(static_cast<const Spacecraft &>(*po), physObjDrawSize,
+                     currObjData._color, *spacecraftTexture,
+                     engineExhaustColor, engineExhaustTexture);
     }
     else {
       glLineWidth(lineWidthPhysObj);
@@ -390,10 +400,75 @@ void setupTextures() {
   }
 
   borderColorTexture.createOneColor(0, 0, 255);
+
+  auto exhaustRgb = engineExhaustColor.rgbData();
+  engineExhaustTexture.createOneColor(exhaustRgb[0], exhaustRgb[1], exhaustRgb[2]);
 }
 
-void drawSpacecraft(const Spacecraft & spacecraft, double size) {
-  drawGluCylinder(vectorToGlmDvec3(spacecraft._position),
-                  vectorToGlmDvec3(spacecraft._direction),
-                  size, 0, size * 2.5, 30, 30, false);
+// TODO: move to some file in UtilitiesGl
+// Vectors originalDirection and destinationDirection must be normalized.
+void getDirectionDifference(
+    const glm::dvec3 & originalDirection, const glm::dvec3 & destinationDirection,
+    double & rotationAngleDeg, glm::dvec3 & rotationAxis)
+{
+  if(originalDirection == destinationDirection) {
+    rotationAxis = glm::dvec3(0, 1, 0);
+    rotationAngleDeg = 0;
+    return;
+  }
+
+  if(originalDirection == -destinationDirection) {
+    rotationAxis = glm::dvec3(0, 1, 0);
+    rotationAngleDeg = 180;
+    return;
+  }
+
+  rotationAxis = glm::cross(originalDirection, destinationDirection);
+
+  auto dotProduct = glm::dot(originalDirection, destinationDirection);
+  auto rotationAngleRad = acos(dotProduct);
+  rotationAngleDeg = rotationAngleRad / M_PI * 180.0;
+}
+
+void drawSpacecraft(const Spacecraft & spacecraft, double size,
+                    const Color & spacecraftColor, const Texture & spacecraftTexture,
+                    const Color & exhaustColor, const Texture & exhaustTexture)
+{
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glTranslated(spacecraft._position.v[0], spacecraft._position.v[1], spacecraft._position.v[2]);
+  glPushMatrix();
+
+  double rotationAngleDeg = 0;
+  glm::dvec3 rotationAxis;
+  getDirectionDifference(glm::dvec3(0, 0, 1), vectorToGlmDvec3(spacecraft._direction),
+                         rotationAngleDeg, rotationAxis);
+
+  if(spacecraftTexture.isValid()) {
+    spacecraftTexture.use();
+  }
+  else {
+    glColor3ubv(spacecraftColor.rgbData());
+  }
+
+  glRotated(rotationAngleDeg, rotationAxis.x, rotationAxis.y, rotationAxis.z);
+  glTranslated(0, 0, -(size / 2));
+  drawGluCylinder(size, 0, size * 2.5, 30, 30, false);
+
+  glPopMatrix();
+
+  if(spacecraft._engineOn) {
+    if(exhaustTexture.isValid()) {
+      exhaustTexture.use();
+    }
+    else {
+      glColor3ubv(exhaustColor.rgbData());
+    }
+
+    glRotated(rotationAngleDeg + 180, rotationAxis.x, rotationAxis.y, rotationAxis.z);
+    glTranslated(0, 0, size / 2);
+    drawGluCylinder(size /2, 0, size * 2.5, 30, 30, false);
+  }
+
+  glPopMatrix();
 }

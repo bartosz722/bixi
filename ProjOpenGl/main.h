@@ -33,6 +33,8 @@ void reshape(int x, int y);
 void readUniverse(int);
 void setupLocalPhysicalObjectData();
 void printPrecisionTestResult();
-void drawSpacecraft(const Spacecraft & spacecraft, double size);
+void drawSpacecraft(const Spacecraft & spacecraft, double size,
+                    const Color & spacecraftColor, const Texture & spacecraftTexture,
+                    const Color & exhaustColor, const Texture & exhaustTexture);
 
 #endif /* PROJOPENGL_MAIN_H_ */
