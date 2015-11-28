@@ -17,7 +17,7 @@
 #include "MainData.h"
 #include "Keyboard.h"
 #include "Texture.h"
-#include "GlVectorConversion.h"
+#include "GlVectorUtil.h"
 
 void printPhysicalObjects(const PhysicalObjectsContainer & poc);
 void setupUniverse();
