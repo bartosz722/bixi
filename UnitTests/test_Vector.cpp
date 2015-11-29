@@ -68,3 +68,67 @@ TEST(Vector, Clear) {
   v1.clear();
   CHECK(v1 == Vector(0.0, 0.0, 0.0));
 }
+
+TEST(Vector, CrossProduct) {
+  {
+    Vector v1(1, 0, 0);
+    Vector v2(0, 1, 0);
+    Vector cp12 = v1.crossProduct(v2);
+    Vector cp21 = v2.crossProduct(v1);
+    CHECK(cp12 == Vector(0, 0, 1));
+    CHECK(cp21 == Vector(0, 0, -1))
+  }
+  {
+    Vector v1(1, 0, 0);
+    Vector v2(0, -1, 0);
+    Vector cp = v1.crossProduct(v2);
+    CHECK(cp == Vector(0, 0, -1));
+  }
+  {
+    Vector v1(1, 0, 0);
+    Vector v2(2, 0, 0);
+    Vector cp = v1.crossProduct(v2);
+    Vector cpr = v1.crossProduct(v2 * -1.0);
+    CHECK(cp == Vector(0, 0, 0));
+    CHECK(cpr == Vector(0, 0, 0));
+  }
+  {
+    Vector v1(3, 2, 0);
+    Vector v2(5, 0, 0);
+    Vector cp = v1.crossProduct(v2);
+    CHECK(cp == Vector(0, 0, -10));
+  }
+  {
+    Vector v1(1, 2, 3);
+    Vector v2(4, 5, 6);
+    Vector cp = v1.crossProduct(v2);
+    CHECK(cp == Vector(-3, 6, -3));
+  }
+}
+
+TEST(Vector, Rotate) {
+  {
+    Vector v1(1, 0, 0);
+    Vector v2(0, 1, 0);
+    v1.rotate(v2, 90);
+    DOUBLES_EQUAL(0, v1.v[0], 0.000001);
+    DOUBLES_EQUAL(0, v1.v[1], 0.000001);
+    DOUBLES_EQUAL(-1, v1.v[2], 0.000001);
+  }
+  {
+    Vector v1(1, 0, 0);
+    Vector v2(0, 1, 0);
+    v1.rotate(v2, -90);
+    DOUBLES_EQUAL(0, v1.v[0], 0.000001);
+    DOUBLES_EQUAL(0, v1.v[1], 0.000001);
+    DOUBLES_EQUAL(1, v1.v[2], 0.000001);
+  }
+  {
+    Vector v1(1, 0, 0);
+    Vector v2(0, 1, -1);
+    v1.rotate(v2, 30);
+    DOUBLES_EQUAL(0.866025, v1.v[0], 0.000001);
+    DOUBLES_EQUAL(-0.353553, v1.v[1], 0.000001);
+    DOUBLES_EQUAL(-0.353553, v1.v[2], 0.000001);
+  }
+}

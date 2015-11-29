@@ -18,6 +18,9 @@ public:
   double length() const;
   double length_pow2() const;
 
+  Vector crossProduct(const Vector & other) const;
+  void rotate(const Vector & around, double angleDeg);
+
   double v[3];
 
   friend std::ostream & operator<<(std::ostream & s, const Vector & v);

@@ -6,6 +6,9 @@ namespace Math {
 double ballVolume(double radius);
 double ballRadius(double volume);
 
+double radToDeg(double rad);
+double degToRad(double deg);
+
 }
 
 #endif /* UTILITIES_MATH_H_ */

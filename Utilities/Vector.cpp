@@ -1,5 +1,23 @@
 #include <cmath>
+#include "Math.h"
 #include "Vector.h"
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+
+namespace {
+
+glm::dvec3 privVectorToGlmDvec3(const Vector & v) {
+  return glm::dvec3(v.v[0], v.v[1], v.v[2]);
+}
+
+Vector privGlmDvec3ToVector(const glm::dvec3 & v) {
+  return Vector(v.x, v.y, v.z);
+}
+
+}
+
 
 Vector::Vector() {
   clear();
@@ -73,6 +91,23 @@ double Vector::length_pow2() const {
     sum += v[i] * v[i];
   }
   return sum;
+}
+
+Vector Vector::crossProduct(const Vector & other) const {
+  auto gv1 = privVectorToGlmDvec3(*this);
+  auto gv2 = privVectorToGlmDvec3(other);
+  auto gprod = glm::cross(gv1, gv2);
+  return privGlmDvec3ToVector(gprod);
+}
+
+void Vector::rotate(const Vector & around, double angleDeg) {
+  // When observer looks in direction of 'around' vector and angle is positive
+  // then vector is rotated right.
+  auto gthis = privVectorToGlmDvec3(*this);
+  auto garound = privVectorToGlmDvec3(around);
+  double angleRad = Math::degToRad(angleDeg);
+  auto gresult = glm::rotate(gthis, angleRad, garound);
+  *this = privGlmDvec3ToVector(gresult);
 }
 
 std::ostream & operator<<(std::ostream & s, const Vector & v) {

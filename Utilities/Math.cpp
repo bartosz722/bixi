@@ -12,4 +12,12 @@ double ballRadius(double volume) {
   return cbrt(a);
 }
 
+double radToDeg(double rad) {
+  return rad / M_PI * 180.0;
+}
+
+double degToRad(double deg) {
+  return deg / 180.0 * M_PI;
+}
+
 }
