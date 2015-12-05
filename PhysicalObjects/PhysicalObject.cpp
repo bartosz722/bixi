@@ -3,8 +3,9 @@
 
 PhysicalObject::PhysicalObject()
   : _mass(0.0)
-  , _direction(1.0, 0, 0)
   , _active(true)
+  , _direction(1, 0, 0)
+  , _orientation(0, 1, 0)
   , _type(PhysicalObjectType::PhysicalObject)
   , _id(_invalidId)
 {
@@ -54,4 +55,16 @@ void PhysicalObject::clearNextStateVariables() {
 void PhysicalObject::setId(int id) {
   ASSERT(_id == _invalidId);
   _id = id;
+}
+
+void PhysicalObject::turnFromLeftToRight(double angleDeg) {
+  // rotate _direction around _orientation
+  _direction.rotate(_orientation, -angleDeg);
+}
+
+void PhysicalObject::turnFromDownToUp(double angleDeg) {
+  // rotate _direction and _orientation around their cross product
+  auto crossProduct = _direction.crossProduct(_orientation);
+  _direction.rotate(crossProduct, angleDeg);
+  _orientation.rotate(crossProduct, angleDeg);
 }

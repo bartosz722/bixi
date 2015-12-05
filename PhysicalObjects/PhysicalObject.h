@@ -27,14 +27,18 @@ public:
   virtual void moveToNextState(double deltaTime);
   virtual void clearNextStateVariables();
 
+  void turnFromLeftToRight(double angleDeg);
+  void turnFromDownToUp(double angleDeg);
+
   static const int _invalidId = -1;
 
   // State:
   double _mass; // kg
   Vector _position; // m
-  Vector _direction; // dimensionless; it has always a length of 1
   Vector _velocity; // m/s, relative to [0,0,0]
   bool _active;
+  Vector _direction; // dimensionless, normalized; it defines "forward"
+  Vector _orientation; // dimensionless, normalized, orthogonal to _direction, it defines "up"
 
   // Next state variables:
   Vector _force;

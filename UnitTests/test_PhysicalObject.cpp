@@ -2,6 +2,7 @@
 #include "CppUTest/TestHarness.h"
 #include "PhysicalObject.h"
 #include "PhysicalDefinitions.h"
+#include "unit_tests_tools.h"
 
 TEST_GROUP(PhysicalObject) {
   void checkObjectsEqual(const PhysicalObject & po1, const PhysicalObject & po2) {
@@ -12,6 +13,8 @@ TEST_GROUP(PhysicalObject) {
     CHECK(po1._velocity == po2._velocity);
     CHECK(po1._position == po2._position);
     CHECK(po1._force == po2._force);
+    CHECK(po1._direction == po2._direction);
+    CHECK(po1._orientation == po2._orientation);
   }
 };
 
@@ -92,4 +95,66 @@ TEST(PhysicalObject, CopyFrom) {
 
   po2.copyFrom(po);
   checkObjectsEqual(po, po2);
+}
+
+TEST(PhysicalObject, TurnFromLeftToRight) {
+  const double tolerance = 0.000001;
+
+  {
+    PhysicalObject po;
+    po._direction = {1, 0, 0};
+    po._orientation = {0, 1, 0};
+    po.turnFromLeftToRight(90);
+    CHECK(ut_tools::compareVectors(po._direction, Vector(0, 0, 1), tolerance));
+    CHECK(ut_tools::compareVectors(po._orientation, Vector(0, 1, 0), tolerance));
+  }
+
+  {
+    PhysicalObject po;
+    po._direction = {1, 0, 0};
+    po._orientation = {0, 1, 0};
+    po.turnFromLeftToRight(-90);
+    CHECK(ut_tools::compareVectors(po._direction, Vector(0, 0, -1), tolerance));
+    CHECK(ut_tools::compareVectors(po._orientation, Vector(0, 1, 0), tolerance));
+  }
+
+  {
+    PhysicalObject po;
+    po._direction = {0, 0, -1};
+    po._orientation = {-1, 0, 0};
+    po.turnFromLeftToRight(90);
+    CHECK(ut_tools::compareVectors(po._direction, Vector(0, 1, 0), tolerance));
+    CHECK(ut_tools::compareVectors(po._orientation, Vector(-1, 0, 0), tolerance));
+  }
+}
+
+TEST(PhysicalObject, TurnFromDownToUp) {
+  const double tolerance = 0.000001;
+
+  {
+    PhysicalObject po;
+    po._direction = {1, 0, 0};
+    po._orientation = {0, 1, 0};
+    po.turnFromDownToUp(90);
+    CHECK(ut_tools::compareVectors(po._direction, Vector(0, 1, 0), tolerance));
+    CHECK(ut_tools::compareVectors(po._orientation, Vector(-1, 0, 0), tolerance));
+  }
+
+  {
+    PhysicalObject po;
+    po._direction = {1, 0, 0};
+    po._orientation = {0, 1, 0};
+    po.turnFromDownToUp(-90);
+    CHECK(ut_tools::compareVectors(po._direction, Vector(0, -1, 0), tolerance));
+    CHECK(ut_tools::compareVectors(po._orientation, Vector(1, 0, 0), tolerance));
+  }
+
+  {
+    PhysicalObject po;
+    po._direction = {0, 0, -1};
+    po._orientation = {-1, 0, 0};
+    po.turnFromDownToUp(90);
+    CHECK(ut_tools::compareVectors(po._direction, Vector(-1, 0, 0), tolerance));
+    CHECK(ut_tools::compareVectors(po._orientation, Vector(0, 0, 1), tolerance));
+  }
 }
