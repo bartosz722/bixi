@@ -426,9 +426,11 @@ void drawSpacecraft(const Spacecraft & spacecraft, double size,
     glColor3ubv(spacecraftColor.rgbData());
   }
 
+  const double height = size * 2.5;
+
   glRotated(rotationAngleDeg, rotationAxis.x, rotationAxis.y, rotationAxis.z);
-  glTranslated(0, 0, -(size / 2));
-  drawGluCylinder(size, 0, size * 2.5, 30, 30, false);
+  glTranslated(0, 0, -(height / 2));
+  drawGluCylinder(size, 0, height, 30, 30, false);
 
   glPopMatrix();
 
@@ -441,8 +443,8 @@ void drawSpacecraft(const Spacecraft & spacecraft, double size,
     }
 
     glRotated(rotationAngleDeg + 180, rotationAxis.x, rotationAxis.y, rotationAxis.z);
-    glTranslated(0, 0, size / 2);
-    drawGluCylinder(size /2, 0, size * 2.5, 30, 30, false);
+    glTranslated(0, 0, height / 2);
+    drawGluCylinder(size / 2, 0, height, 30, 30, false);
   }
 
   glPopMatrix();
