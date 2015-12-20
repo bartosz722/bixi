@@ -22,6 +22,7 @@ HEADERS += ../PhysicalObjects/PhysicalObject.h \
            ../Universe/PhysicalObjectProperties.h \
            ../Universe/CollisionComparator.h \
            ../Universe/PrecisionTester.h \
+           ../Universe/Pilot.h \
            ../Utilities/Assert.h \
            ../Utilities/BasicDefinitions.h \
            ../Utilities/PhysicalDefinitions.h \
@@ -47,6 +48,7 @@ SOURCES += ../PhysicalObjects/PhysicalObject.cpp \
            ../Universe/Tracker.cpp \
            ../Universe/PrecisionTester.cpp \
            ../Universe/PhysicalObjectProperties.cpp \
+           ../Universe/Pilot.cpp \
            ../Utilities/PhysicalDefinitions.cpp \
            ../Utilities/Vector.cpp \
            ../Utilities/Math.cpp \
