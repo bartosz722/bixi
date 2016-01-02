@@ -22,21 +22,23 @@ public:
     TurnUp
   };
 
+  struct ActionData {
+    double _execTime;
+    uint16_t _order; // lower value - first to execute
+    Action _action;
+    double _arg1;
+
+    bool operator<(const ActionData & other) const;
+  };
+
   Pilot(Spacecraft & s);
 
-  void addAction(double executionTime, Action a, double arg1);
+  void addAction(const ActionData & a);
   void executeCurrentActions(double currentTime);
 
 private:
-  struct ActionData {
-      double _execTime;
-      Action _action;
-      double _arg1;
-
-      static bool compare(const ActionData & ad1, const ActionData & ad2);
-    };
-
   void sortActions();
+  bool getActionToExecute(ActionData & actionData, double currentTime);
 
   std::deque<ActionData> _actions;
   bool _actionsSorted;
