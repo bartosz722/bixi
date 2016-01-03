@@ -19,7 +19,8 @@ public:
     SetThrustMassRate,
     SetThrustSpeed,
     TurnRight,
-    TurnUp
+    TurnUp,
+    COUNT
   };
 
   struct ActionData {
@@ -29,12 +30,14 @@ public:
     double _arg1;
 
     bool operator<(const ActionData & other) const;
+    std::string toString(bool withOrderData = false) const;
   };
 
   Pilot(Spacecraft & s);
 
   void addAction(const ActionData & a);
   void executeCurrentActions(double currentTime);
+  int getSpacecraftId() const { return _spacecraft.getId(); }
 
 private:
   void sortActions();
