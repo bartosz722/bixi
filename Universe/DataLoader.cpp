@@ -9,7 +9,7 @@
 using namespace std;
 
 bool loadUniverseData(Universe & u) {
-  int physObjSet = 8;
+  int physObjSet = 9;
 
   Universe::Settings s;
   s._collision = Universe::CollisionBehaviour::StopUniverse;
@@ -269,6 +269,43 @@ bool loadUniverseData(Universe & u) {
     pop._tracked = true;
 
     u.insertPhysicalObject(rocket, pop);
+  }
+  else if(physObjSet == 9) {
+    // Pilot test
+    s._G = constG;
+    s._timeUnit = 0.0001;
+    s._roundsPerSecond = 50;
+    s._ticksPerRound = 200;
+
+    SphericalObject planet;
+    planet._radius = 100;
+    planet._mass = 0.001;
+    planet._position = Vector(0, 0, 0);
+    planet._velocity = Vector(0, 0, 0);
+    pop._color = { 0, 255, 0 };
+    pop._tracked = false;
+    u.insertPhysicalObject(planet, pop);
+
+    Spacecraft rocket;
+    const double emptyMass = 50;
+    const double propellantMass = 100;
+    rocket._mass = emptyMass + propellantMass;
+    rocket._position = Vector(planet._radius * 2, 0, 0);
+    rocket._velocity = Vector(0, 0, 0);
+    rocket._engineOn = false;
+    rocket._propellantMass = propellantMass;
+    rocket._thrustMassRate = 1;
+    rocket._thrustSpeed = 500;
+    pop._color = { 255, 0, 0 };
+    pop._tracked = true;
+
+    int rid = u.insertPhysicalObject(rocket, pop);
+
+    u.addActionForPilot(rid, {2, 0, Pilot::Action::TurnUp, 45});
+    u.addActionForPilot(rid, {2, 1, Pilot::Action::EngineOn, 0});
+    u.addActionForPilot(rid, {4, 0, Pilot::Action::EngineOff, 0});
+    u.addActionForPilot(rid, {6, 0, Pilot::Action::EngineOn, 0});
+    u.addActionForPilot(rid, {8, 0, Pilot::Action::EngineOff, 0});
   }
 
   u.setSettings(s);

@@ -68,14 +68,15 @@ void Universe::setSettings(const Settings & s) {
   cout << "_ticksPerRound: " << _sett._ticksPerRound << endl;
 }
 
-void Universe
+int Universe
 ::insertPhysicalObject(const PhysicalObject & po, const PhysicalObjectProperties & prop) {
   ASSERT(po._mass != 0.0);
-  int id = _nextPhysicalObjectId++;
+  const int id = _nextPhysicalObjectId++;
   _objects.insert(po);
   _objects.back()->setId(id);
   _properties.push_back(prop);
   _properties.back().setId(id);
+  return id;
 }
 
 bool Universe::start() {
@@ -130,6 +131,11 @@ void Universe::tick() {
       continue;
     }
     po->clearNextStateVariables();
+  }
+
+  // Let the pilot control his spacecraft
+  if(_pilot) {
+    _pilot->executeCurrentActions(_elapsedTime);
   }
 
   // Calculate next state of objects
@@ -294,3 +300,26 @@ PrecisionTester::Result Universe::getPrecisionTestResult() {
   lock_guard<mutex> locker(_mutexData);
   return _precisionTester.getPrecisionTestResult();
 }
+
+void Universe::addActionForPilot(int spacecraftId, Pilot::ActionData ad) {
+  for(const auto & po : _objects) {
+    if(po->getId() == spacecraftId && po->getType() == PhysicalObjectType::Spacecraft) {
+      Spacecraft & sc = static_cast<Spacecraft &>(*po);
+      if(_pilot) {
+        if(_pilot->getSpacecraftId() != sc.getId()) {
+          cout << "Pilot already created for other spacecraft\n";
+          return;
+        }
+      }
+      else {
+        _pilot.reset(new Pilot(sc));
+      }
+
+      _pilot->addAction(ad);
+      cout << "Added action for pilot of spacecraft " << spacecraftId << ": "
+          << ad.toString(true) << endl;
+      break;
+    }
+  }
+}
+
