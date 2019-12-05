@@ -15,6 +15,7 @@
 #include "PhysicalObjectsContainer.h"
 #include "PhysicalObjectProperties.h"
 #include "PrecisionTester.h"
+#include "Pilot.h"
 
 // Marks:
 // TS - method is thread-safe and may be called only after start() was called.
@@ -51,8 +52,11 @@ public:
   ~Universe();
 
   void setSettings(const Settings & s);
-  void insertPhysicalObject(const PhysicalObject & po, const PhysicalObjectProperties & prop);
+  // return: id of inserted object
+  int insertPhysicalObject(const PhysicalObject & po, const PhysicalObjectProperties & prop);
   const PropertiesT & getPhysicalObjectsProperties() const { return _properties; }
+  // Only one pilot is supported.
+  void addActionForPilot(int spacecraftId, Pilot::ActionData ad);
   bool start();
   void stop(); // TS; can not be started after is stopped
 
@@ -97,8 +101,9 @@ private:
   PhysicalObjectsContainer _objects;
 
   // not synchronized physical objects data:
-  // read-only after call to start(), consistent with _objects
+  // (_properties) read-only after call to start(), consistent with _objects
   std::vector<PhysicalObjectProperties> _properties;
+  std::unique_ptr<Pilot> _pilot;
 
   // Thread executed after start() has finished.
   std::thread _thread;
